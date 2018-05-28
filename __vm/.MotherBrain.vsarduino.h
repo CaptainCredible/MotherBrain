@@ -68,4 +68,7 @@ typedef void *__builtin_va_list;
 #undef PSTR
 #define PSTR(string_literal) ((const PROGMEM char *)(string_literal))
 #include "MicroBitMotherBrain.ino"
+#include "debug.ino"
+#include "handleSequencer.ino"
+#include "midiCallbacks.ino"
 #endif

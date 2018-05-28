@@ -16,6 +16,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="MicroBitMotherBrain.ino" />
+    <None Include="handleSequencer.ino" />
+    <None Include="midiCallbacks.ino" />
+    <None Include="debug.ino" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.MicroBitMotherBrain.vsarduino.h">
