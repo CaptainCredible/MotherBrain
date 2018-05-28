@@ -1,6 +1,6 @@
 void handleLPNoteOn(byte channel, byte pitch, byte velocity) {
-	sendWire2microBit(pitch);
 	digitalWrite(LEDPIN, HIGH);
+	sendWire2microBit(pitch);
 }
 
 void handleLPNoteOff(byte channel, byte pitch, byte velocity) {

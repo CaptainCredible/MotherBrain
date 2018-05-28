@@ -52,6 +52,7 @@ void setup()
 	launchPad.setHandleNoteOn(handleLPNoteOn);
 	launchPad.setHandleNoteOff(handleLPNoteOff);
 	launchPad.setHandleControlChange(handleLPCC);
+	//digitalWrite(LEDPIN, HIGH);
 }
 unsigned long clockTimer = 0;
 int stepDuration = 500;
