@@ -1,5 +1,4 @@
-byte currentPage = 200;
-byte firstStepOfPage = 0;
+
 void updatePage() {
 	
 	if (currentPage != currentStep >> 3) { //Time to flip the page
@@ -18,6 +17,7 @@ void updatePage() {
 			}
 		}
 	}
+	handleCursor();
 }
 
 byte reset[3] = { 176,0,0 };

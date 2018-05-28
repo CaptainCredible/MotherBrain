@@ -6,10 +6,13 @@
 #define interruptPin 16
 byte colour = 45;
 byte noteToSend = 123;
+bool runClock = false;
+
 
 //MIDI.CREATE_DEFAULT_INSTANCE();
 MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, launchPad);
 
+byte scrollOffset = 0;
 
 byte seqMatrix[320]{
 	1,0,0,0,0,0,0,0,	1,0,0,0,0,0,1,0,	127,127,127,127,
@@ -29,7 +32,8 @@ byte seqMatrix[320]{
 	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	127,127,127,127,
 	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	127,127,127,127,
 };
-
+byte currentPage = 200;
+byte firstStepOfPage = 0;
 
 byte LPMAP[64]{
 	  0,  1,  2,  3,  4,  5,  6,  7,
@@ -40,6 +44,18 @@ byte LPMAP[64]{
 	 80, 81, 82, 83, 84, 85, 86, 87,
 	 96, 97, 98, 99,100,101,102,103,
 	112,113,114,115,116,117,118,119,
+};
+
+byte LPtoMatrix[128]{
+	  0,  1,  2,  3,  4,  5,  6,  7,	-1,-1,-1,-1,-1,-1,-1,-1,
+	 20, 21, 22, 23, 24, 25, 26, 27,	-1,-1,-1,-1,-1,-1,-1,-1,
+	 40, 41, 42, 43, 44, 45, 46, 47,	-1,-1,-1,-1,-1,-1,-1,-1,
+	 60, 61, 62, 63, 64, 65, 66, 67,	-1,-1,-1,-1,-1,-1,-1,-1,
+
+	 80, 81, 82, 83, 84, 85, 86, 87,	-1,-1,-1,-1,-1,-1,-1,-1,
+	100,101,102,103,104,105,106,107,	-1,-1,-1,-1,-1,-1,-1,-1,
+	120,121,122,123,124,125,126,127,	-1,-1,-1,-1,-1,-1,-1,-1,
+	140,141,142,143,144,145,146,147,	-1,-1,-1,-1,-1,-1,-1,-1
 };
 
 byte topButts[8] = {104,105,106,107,108,109,110,111};
@@ -66,16 +82,18 @@ int seqLength = 16;
 bool isSending = false;
 
 void handleClock() {
+	if(runClock){
 	if (millis() > clockTimer + stepDuration) {
 		clockTimer = millis();
 		lastStep = currentStep;
 		currentStep++;
 		currentStep = currentStep % seqLength;
 		updatePage();
-		handleCursor();
+		//handleCursor();
 		handleStep();
 		
 		Serial.println(currentStep);
+	}
 	}
 }
 
