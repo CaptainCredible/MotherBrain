@@ -12,14 +12,14 @@ MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, launchPad);
 
 
 byte seqMatrix[320]{
-	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	127,127,127,127,
-	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	127,127,127,127,
-	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	127,127,127,127,
-	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	127,127,127,127,
-	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	127,127,127,127,
-	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	127,127,127,127,
-	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	127,127,127,127,
-	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	127,127,127,127,
+	1,0,0,0,0,0,0,0,	1,0,0,0,0,0,1,0,	127,127,127,127,
+	0,1,0,0,0,0,0,0,	0,0,0,0,0,1,0,0,	127,127,127,127,
+	0,0,1,0,0,0,0,0,	0,1,0,0,1,0,0,0,	127,127,127,127,
+	0,0,0,1,0,0,0,0,	0,0,0,1,0,0,0,0,	127,127,127,127,
+	0,0,0,0,1,0,0,0,	0,0,1,0,0,0,0,0,	127,127,127,127,
+	0,0,0,0,0,1,0,0,	0,0,0,0,0,0,0,0,	127,127,127,127,
+	0,0,0,0,0,0,1,0,	0,0,0,0,0,0,0,0,	127,127,127,127,
+	0,0,0,0,0,0,0,1,	0,0,0,0,0,0,0,0,	127,127,127,127,
 	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	127,127,127,127,
 	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	127,127,127,127,
 	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	127,127,127,127,
@@ -29,6 +29,7 @@ byte seqMatrix[320]{
 	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	127,127,127,127,
 	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	127,127,127,127,
 };
+
 
 byte LPMAP[64]{
 	  0,  1,  2,  3,  4,  5,  6,  7,
@@ -41,6 +42,8 @@ byte LPMAP[64]{
 	112,113,114,115,116,117,118,119,
 };
 
+byte topButts[8] = {104,105,106,107,108,109,110,111};
+
 void setup()
 {
 	Wire.begin(8);                // join i2c bus with address #8
@@ -49,6 +52,7 @@ void setup()
 	launchPad.turnThruOff();
 	Wire.onRequest(requestEvent); // register event
 	pinMode(interruptPin, OUTPUT);
+	digitalWrite(interruptPin, HIGH); //the microbit registers falling edge
 	launchPad.setHandleNoteOn(handleLPNoteOn);
 	launchPad.setHandleNoteOff(handleLPNoteOff);
 	launchPad.setHandleControlChange(handleLPCC);
@@ -63,11 +67,15 @@ bool isSending = false;
 
 void handleClock() {
 	if (millis() > clockTimer + stepDuration) {
+		clockTimer = millis();
 		lastStep = currentStep;
-		handleCursor();
-		handleStep();
 		currentStep++;
 		currentStep = currentStep % seqLength;
+		updatePage();
+		handleCursor();
+		handleStep();
+		
+		Serial.println(currentStep);
 	}
 }
 
@@ -76,7 +84,7 @@ unsigned long int timeOutStamp = 0;
 
 void sendWire2microBit(byte note) {
 	noteToSend = note;
-	digitalWrite(interruptPin, HIGH);
+	digitalWrite(interruptPin, LOW);
 	isSending = true;
 	timeOutStamp = millis();
 }
@@ -85,19 +93,20 @@ void sendWire2microBit(byte note) {
 
 void loop()
 {
-	debug();
+	handleClock();
+	launchPad.read();
 }
 
 #define timeOut  10
 void checkTimeOut() {
 	if (millis() - timeOutStamp > timeOut) {
-		digitalWrite(interruptPin, LOW);
+		digitalWrite(interruptPin, HIGH);
 		isSending = false;
 	}
 }
 
 void requestEvent() {
 	Wire.write(noteToSend);
-	digitalWrite(interruptPin, LOW);
+	digitalWrite(interruptPin, HIGH);
 	isSending = false;
 }

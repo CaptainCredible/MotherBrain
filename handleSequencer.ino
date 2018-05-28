@@ -1,6 +1,4 @@
-void handleCursor() {
 
-}
 void handleStep() {
 
 }

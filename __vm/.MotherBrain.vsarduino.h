@@ -71,4 +71,5 @@ typedef void *__builtin_va_list;
 #include "debug.ino"
 #include "handleSequencer.ino"
 #include "midiCallbacks.ino"
+#include "updatePage.ino"
 #endif

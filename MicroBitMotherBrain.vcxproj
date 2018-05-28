@@ -91,6 +91,9 @@
     <None Include="midiCallbacks.ino">
       <FileType>CppCode</FileType>
     </None>
+    <None Include="updatePage.ino">
+      <FileType>CppCode</FileType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.MicroBitMotherBrain.vsarduino.h" />
