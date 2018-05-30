@@ -7,6 +7,8 @@
 byte colour = 45;
 byte noteToSend = 123;
 bool runClock = false;
+bool isInt = false;
+byte trackToSend = 0;
 
 
 //MIDI.CREATE_DEFAULT_INSTANCE();
@@ -100,12 +102,7 @@ void handleClock() {
 
 unsigned long int timeOutStamp = 0;
 
-void sendWire2microBit(byte note) {
-	noteToSend = note;
-	digitalWrite(interruptPin, LOW);
-	isSending = true;
-	timeOutStamp = millis();
-}
+
 
 
 
@@ -123,8 +120,3 @@ void checkTimeOut() {
 	}
 }
 
-void requestEvent() {
-	Wire.write(noteToSend);
-	digitalWrite(interruptPin, HIGH);
-	isSending = false;
-}
