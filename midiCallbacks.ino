@@ -3,21 +3,18 @@ void handleLPNoteOn(byte channel, byte pitch, byte velocity) {
 	int matrixCursor = LPtoMatrix[pitch] + (currentPage * 8) + (scrollOffset * 20);
 	if (seqMatrix[matrixCursor] > 0) {
 		seqMatrix[matrixCursor] = 0;
-		Serial.print("turned it off - ");
+		//Serial.print("turned it off - ");
+		LPSetLedRaw(pitch, 0);
 	} 
 	else {
-		Serial.print("turned it on - ");
+		//Serial.print("turned it on - ");
 		seqMatrix[matrixCursor] = 123;
+		LPSetLedRaw(pitch, 123);
 	}
-	sendWire2microBitTrackAndNote(pitch, trackToSend);
-	currentPage = 100; //force page update
-	updatePage();
-	currentPage = 0; //force page update
+	
+	//updatePage(true); //instead of forcing an update of the entire page, i should write an algorithm that updates the coordinate in question
 	handleCursor();
 	//Serial.println(matrixCursor);
-
-
-
 	//digitalWrite(LEDPIN, HIGH);
 	//sendWire2microBit(pitch);
 }
@@ -34,6 +31,26 @@ void handleLPCC(byte channel, byte CC, byte val) {
 		{
 		case 1:
 			runClock = !runClock;
+			break;
+		case 6:
+			currentStep = 255;
+			handleStep();
+			clockTimer = millis();
+			if (!runClock) {
+				currentStep = 0;
+				updatePage();
+			}
+			updatePage();
+			handleCursor();
+		case 7:
+			currentStep--;
+			updatePage();
+			handleCursor();
+			break;
+		case 8:
+			currentStep++;
+			updatePage();
+			handleCursor();
 			break;
 		default:
 			trackToSend = buttWasPressed -1;

@@ -36,7 +36,8 @@ byte seqMatrix[320]{
 	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	127,127,127,127,
 	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	127,127,127,127,
 };
-byte currentPage = 200;
+byte prevPage = 100;
+byte currentPage = 0;
 byte firstStepOfPage = 0;
 
 byte LPMAP[64]{
@@ -64,6 +65,13 @@ byte LPtoMatrix[128]{
 
 byte topButts[8] = {104,105,106,107,108,109,110,111};
 
+unsigned long clockTimer = 0;
+int stepDuration = 800;
+int lastStep = 200;
+int currentStep = -1;
+int seqLength = 16;
+bool isSending = false;
+
 void setup()
 {
 	Wire.begin(8);                // join i2c bus with address #8
@@ -79,14 +87,13 @@ void setup()
 	launchPad.setHandleNoteOff(handleLPNoteOff);
 	launchPad.setHandleControlChange(handleLPCC);
 	//digitalWrite(LEDPIN, HIGH);
-	updatePage();
+	if (!runClock) {
+		currentStep = 0;
+		updatePage();
+	}
+	
 }
-unsigned long clockTimer = 0;
-int stepDuration = 200;
-int lastStep = 200;
-int currentStep = -1;
-int seqLength = 16;
-bool isSending = false;
+
 
 void handleClock() {
 	if(runClock){

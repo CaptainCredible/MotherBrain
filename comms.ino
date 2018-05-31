@@ -7,9 +7,11 @@ void sendWire2microBit(int note) {
 	timeOutStamp = millis();
 }
 
-void sendWire2microBitTrackAndNote(byte note, byte track) {
+void sendWire2microBitTrackAndNote(byte note, byte traxx) {
+	Serial.print("sent track ");
+	Serial.println(traxx);
 	trackOrNote = true;
-	noteToSend = note + (track << 8);
+	noteToSend = note + (traxx << 8);
 	digitalWrite(interruptPin, LOW); //start by telling microbit to request track
 	isSending = true;
 	timeOutStamp = millis();
