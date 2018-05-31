@@ -1,13 +1,15 @@
 
 #include <MIDI.h>
 #include <Wire.h>
+//#include <I2C_Anything.h>
 
-#define LEDPIN 10
+#define LEDPIN 14
 #define interruptPin 16
+#define interruptPin2 10
 byte colour = 45;
-byte noteToSend = 123;
+int noteToSend = 123;
 bool runClock = false;
-bool isInt = false;
+bool trackOrNote = false;
 byte trackToSend = 0;
 
 
@@ -71,13 +73,16 @@ void setup()
 	Wire.onRequest(requestEvent); // register event
 	pinMode(interruptPin, OUTPUT);
 	digitalWrite(interruptPin, HIGH); //the microbit registers falling edge
+	pinMode(interruptPin2, OUTPUT);
+	digitalWrite(interruptPin2, HIGH); //the microbit registers falling edge
 	launchPad.setHandleNoteOn(handleLPNoteOn);
 	launchPad.setHandleNoteOff(handleLPNoteOff);
 	launchPad.setHandleControlChange(handleLPCC);
 	//digitalWrite(LEDPIN, HIGH);
+	updatePage();
 }
 unsigned long clockTimer = 0;
-int stepDuration = 500;
+int stepDuration = 200;
 int lastStep = 200;
 int currentStep = -1;
 int seqLength = 16;
@@ -94,7 +99,7 @@ void handleClock() {
 		//handleCursor();
 		handleStep();
 		
-		Serial.println(currentStep);
+		//Serial.println(currentStep);
 	}
 	}
 }
@@ -110,13 +115,9 @@ void loop()
 {
 	handleClock();
 	launchPad.read();
+	checkTimeOut(); //reset interruptPin and isSending if the microbit missed the message
+
 }
 
-#define timeOut  10
-void checkTimeOut() {
-	if (millis() - timeOutStamp > timeOut) {
-		digitalWrite(interruptPin, HIGH);
-		isSending = false;
-	}
-}
+
 

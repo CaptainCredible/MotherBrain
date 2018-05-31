@@ -9,10 +9,14 @@ void handleLPNoteOn(byte channel, byte pitch, byte velocity) {
 		Serial.print("turned it on - ");
 		seqMatrix[matrixCursor] = 123;
 	}
+	sendWire2microBitTrackAndNote(pitch, trackToSend);
 	currentPage = 100; //force page update
 	updatePage();
+	currentPage = 0; //force page update
 	handleCursor();
-	Serial.println(matrixCursor);
+	//Serial.println(matrixCursor);
+
+
 
 	//digitalWrite(LEDPIN, HIGH);
 	//sendWire2microBit(pitch);
@@ -32,6 +36,9 @@ void handleLPCC(byte channel, byte CC, byte val) {
 			runClock = !runClock;
 			break;
 		default:
+			trackToSend = buttWasPressed -1;
+			Serial.print("trackToSend = ");
+			Serial.println(trackToSend);
 			break;
 		}
 	}
