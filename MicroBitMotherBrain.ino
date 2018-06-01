@@ -40,6 +40,16 @@ byte prevPage = 100;
 byte currentPage = 0;
 byte firstStepOfPage = 0;
 
+int knobA = 0;
+int knobB = 0;
+bool buttA = false;
+bool buttB = false;
+bool buttC = false;
+bool buttX = false;
+
+
+
+
 byte LPMAP[64]{
 	  0,  1,  2,  3,  4,  5,  6,  7,
 	 16, 17, 18, 19, 20, 21, 22, 23,
@@ -72,8 +82,14 @@ int currentStep = -1;
 int seqLength = 16;
 bool isSending = false;
 
+const byte buttApin = A3;
+
 void setup()
 {
+	//pinMode(buttApin, INPUT_PULLUP);
+
+	pinMode(A0, INPUT);
+	pinMode(A1, INPUT);
 	Wire.begin(8);                // join i2c bus with address #8
 	launchPad.begin();
 	pinMode(LEDPIN, OUTPUT);
@@ -102,9 +118,10 @@ void handleClock() {
 		lastStep = currentStep;
 		currentStep++;
 		currentStep = currentStep % seqLength;
+		handleStep();
 		updatePage();
 		//handleCursor();
-		handleStep();
+		
 		
 		//Serial.println(currentStep);
 	}
@@ -123,8 +140,21 @@ void loop()
 	handleClock();
 	launchPad.read();
 	checkTimeOut(); //reset interruptPin and isSending if the microbit missed the message
-
+	handleKnobsAndButtons();
 }
 
+void handleKnobsAndButtons() {
+	knobA = analogRead(A1);
+	knobB = analogRead(A0);
+	//buttA = digitalRead(buttApin);
+	//buttB = digitalRead(A4);
+	//buttC = digitalRead(A4);
+	//buttX = digitalRead(A4);
 
+	stepDuration = (1124 - knobA);
+
+
+	Serial.print(" StepDur ");
+	Serial.println(stepDuration);
+}
 

@@ -7,7 +7,7 @@ void sendWire2microBit(int note) {
 	timeOutStamp = millis();
 }
 
-void sendWire2microBitTrackAndNote(byte note, byte traxx) {
+void sendWire2microBitTrackAndNote(byte traxx, byte note) {
 	Serial.print("sent track ");
 	Serial.println(traxx);
 	trackOrNote = true;
@@ -15,6 +15,7 @@ void sendWire2microBitTrackAndNote(byte note, byte traxx) {
 	digitalWrite(interruptPin, LOW); //start by telling microbit to request track
 	isSending = true;
 	timeOutStamp = millis();
+	delay(2); //change so there is a timer polled and things can be done in background!
 }
 
 int numberToTest = 10;
@@ -36,3 +37,4 @@ void checkTimeOut() {
 		Serial.println(" i2c TIMEOUT! ");
 	}
 }
+

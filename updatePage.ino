@@ -1,10 +1,11 @@
+uint64_t dataString = 0;
+
 
 void updatePage() { // force is a boolean to force a page update even if its not a page flip
 	
 	if (prevPage != (currentStep >> 3)) { //Time to flip the page
 		prevPage = currentPage;
 		currentPage = currentStep >> 3;
-		//Serial.println("updatedPage");
 		firstStepOfPage = currentPage * 8;
 		clearPage();
 		for (byte row = 0; row < 8; row++){
