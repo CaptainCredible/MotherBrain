@@ -16,6 +16,7 @@ void sendWire2microBitTrackAndNote(byte traxx, byte note) {
 	isSending = true;
 	timeOutStamp = millis();
 	delay(2); //change so there is a timer polled and things can be done in background!
+	
 }
 
 int numberToTest = 10;

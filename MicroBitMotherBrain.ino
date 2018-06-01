@@ -73,7 +73,7 @@ byte LPtoMatrix[128]{
 	140,141,142,143,144,145,146,147,	-1,-1,-1,-1,-1,-1,-1,-1
 };
 
-byte topButts[8] = {104,105,106,107,108,109,110,111};
+byte topButts[8] = { 104,105,106,107,108,109,110,111 };
 
 unsigned long clockTimer = 0;
 int stepDuration = 800;
@@ -107,24 +107,20 @@ void setup()
 		currentStep = 0;
 		updatePage();
 	}
-	
+
 }
 
 
 void handleClock() {
-	if(runClock){
-	if (millis() > clockTimer + stepDuration) {
-		clockTimer = millis();
-		lastStep = currentStep;
-		currentStep++;
-		currentStep = currentStep % seqLength;
-		handleStep();
-		updatePage();
-		//handleCursor();
-		
-		
-		//Serial.println(currentStep);
-	}
+	if (runClock) {
+		if (millis() > clockTimer + stepDuration) {
+			clockTimer = millis();
+			lastStep = currentStep;
+			currentStep++;
+			currentStep = currentStep % seqLength;
+			handleStep();
+			updatePage();
+		}
 	}
 }
 
@@ -133,9 +129,13 @@ unsigned long int timeOutStamp = 0;
 
 
 
+uint64_t dataPacket = 9223372036854775806; //(2^64)-1
+void loop() {
+	
+}
 
 
-void loop()
+void notloop()
 {
 	handleClock();
 	launchPad.read();
