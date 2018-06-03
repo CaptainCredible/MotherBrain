@@ -1,7 +1,7 @@
 
 #include <MIDI.h>
 #include <Wire.h>
-//#include <I2C_Anything.h>
+#include <I2C_Anything.h>
 
 #define LEDPIN 14
 #define interruptPin 16
@@ -126,12 +126,71 @@ void handleClock() {
 
 
 unsigned long int timeOutStamp = 0;
+byte counter = 0;
+// long (32 bit) - signed number from -2,147,483,648 to 2,147,483,647
+byte first = 201;
+byte second = 202;
+byte third = 203;
+byte fourth = 204;
+byte fifth = 205;
+byte sixth = 206;
+byte seventh = 207;
+byte eighth = 208;
+
+unsigned long dataPacket = 1;
+
+void thirtyTwoBitPackingWorks() {
+	dataPacket = first;
+	dataPacket = dataPacket << 8;
+	dataPacket = dataPacket + second;
+	dataPacket = dataPacket << 8;
+	dataPacket = dataPacket + third;
+	dataPacket = dataPacket << 8;
+	dataPacket = dataPacket + fourth;
 
 
+	Serial.print("first = ");
+	Serial.println(first);
+	Serial.print("second = ");
+	Serial.println(second);
+	Serial.print("third = ");
+	Serial.println(third);
+	Serial.print("fourth = ");
+	Serial.println(fourth);
 
-uint64_t dataPacket = 9223372036854775806; //(2^64)-1
+
+	Serial.print("full = ");
+	Serial.println(dataPacket);
+	Serial.println();
+}
+
+
+uint64_t dataPacket64 = 0;
+
 void loop() {
-	
+	delay(2000);
+	//send32BitInt();
+	dataPacket64 = first;
+	dataPacket64 = dataPacket64 << 8;
+	dataPacket64 = dataPacket64 + second;
+	dataPacket64 = dataPacket64 << 8;
+	dataPacket64 = dataPacket64 + third;
+	dataPacket64 = dataPacket64 << 8;
+	dataPacket64 = dataPacket64 + fourth;
+	dataPacket64 = dataPacket64 << 8;
+	dataPacket64 = dataPacket64 + fifth;
+	dataPacket64 = dataPacket64 << 8;
+	dataPacket64 = dataPacket64 + sixth;
+	dataPacket64 = dataPacket64 << 8;
+	dataPacket64 = dataPacket64 + seventh;
+	dataPacket64 = dataPacket64 << 8;
+	dataPacket64 = dataPacket64 + eighth;
+	launchPad.sendNoteOn(1, 100, 1);
+	send64BitInt();
+	Serial.println("Alive");
+	delay(100);
+	launchPad.sendNoteOn(1, 0, 1);
+
 }
 
 
@@ -141,6 +200,25 @@ void notloop()
 	launchPad.read();
 	checkTimeOut(); //reset interruptPin and isSending if the microbit missed the message
 	handleKnobsAndButtons();
+}
+
+void datatypeTest() {
+	Serial.print(dataPacket);
+	Serial.print("    -    ");
+	Serial.println(dataPacket, BIN);
+	counter++;
+	Serial.print("counter = ");
+	Serial.println(counter);
+	Serial.print(">> 1 = ");
+	Serial.println(dataPacket >> 1);
+	Serial.println("------------");
+	Serial.println();
+	dataPacket = dataPacket << 1;
+	if (counter > 32) {
+		counter = 0;
+		dataPacket = 1;
+	}
+
 }
 
 void handleKnobsAndButtons() {
