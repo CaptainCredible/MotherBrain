@@ -1,35 +1,76 @@
+byte oldPageMode = 0;
 void updatePage(byte mode) { // force is a boolean to force a page update even if its not a page flip
-
-	if (currentPage != (currentStep >> 3)) { //Time to flip the page
-		Serial.print("REDRAW   prev = ");
-		Serial.print(prevPage);
-		Serial.print(" current = ");
-		Serial.println(currentStep >> 3);
+	if (currentPage != (currentStep >> 3) || forceUpdate || pageMode != oldPageMode) { //Time to flip the page
+		clearPage();
+		oldPageMode = mode;
+		forceUpdate = false;
+		digitalWrite(ledApin, forceUpdate);
+		//Serial.print("REDRAW   mode = ");
+		//Serial.println(pageMode);
 		prevPage = currentPage;
 		currentPage = currentStep >> 3;
 		firstStepOfPage = currentPage * 8;
-		clearPage();
 		updateVertButts();
-		for (byte row = 0; row < 8; row++) {
-			for (byte col = 0; col < 8; col++) {
-				byte ledCursor = (row * 8) + col;
-				byte seqMatrixCursor = col + firstStepOfPage + (row * 20);
-				if (seqMatrix[seqMatrixCursor] > 0) {
-					LPSetLed(ledCursor, seqMatrix[seqMatrixCursor]);
-					delay(1); //todo make wait in background ?
+		if (pageMode == 0) {
+			handleOverviewPage();
+		}
+		else {
+			handleTrackPage(pageMode);
+		}
+	}
+	handleCursor();
+}
+
+void handleTrackPage(byte trackPageToHandle) {
+	byte trackPageWeAreHandling = trackPageToHandle - 1;
+	if (isPoly[trackPageWeAreHandling]) {
+		for (byte col = 0; col < 8; col++) {
+			int seqMatrixCursor = col + (currentPage * 8) + (trackPageWeAreHandling * 20);
+			int val = seqMatrix[seqMatrixCursor];
+			for (int i = 0; i < 8; i++) {
+				if (bitRead(val, i)) {
+					int currentLedCursor = col + (8 * i); // where to point on the LPMAP array
+					LPSetLed(currentLedCursor, trackColours[trackPageWeAreHandling]);
 				}
 			}
 		}
 	}
-	handleCursor();
-	Serial.print("handled overview page : ");
-	Serial.println(currentPage);
+	else {//handle the non poly 127 note tracks
+		for (byte col = 0; col < 8; col++) {
+			int seqMatrixCursor = col + (currentPage * 8) + (trackPageWeAreHandling * 20);
+			int val = seqMatrix[seqMatrixCursor];
+			if (val > 0) {
+				int LPmatrixCursor = col + ((val - 1) * 8);
+				LPSetLed(LPmatrixCursor, trackColours[trackPageWeAreHandling]);
+			}
+			
+		}
+	}
+	
+	
 }
+
+void handleOverviewPage() {
+	//read seqMatrix and set Leds:
+	for (byte row = 0; row < 8; row++) {
+		for (byte col = 0; col < 8; col++) {
+			byte ledCursor = (row * 8) + col;
+			byte seqMatrixCursor = col + firstStepOfPage + (row * 20);
+			if (seqMatrix[seqMatrixCursor] > 0) {
+				LPSetLed(ledCursor, trackColours[row]);
+				delay(1); //todo make wait in background ?
+			}
+		}
+	}
+}
+
 
 byte reset[3] = { 176,0,0 };
 void clearPage() {
+	Serial.println("CLEARED PAGE");
 	Serial1.write(reset, 3);
-	
+	//delay(1000);
+
 }
 
 void LPSetLed(byte led, byte colour) {
@@ -48,32 +89,43 @@ void handleCursor() {
 
 
 void changePageMode(byte newMode) {
-	clearVertButts();
-	pageMode = newMode;
-	if (pageMode == 0) {
-		setAllVertButts();
+	//Serial.print("changed pagemode to ");
+
+	if (newMode != pageMode) { //if a track is selected
+		clearVertButts();
+		pageMode = newMode;
 	}
-	else {
-		launchPad.sendNoteOn(vertButts[pageMode - 1], trackColours[pageMode - 1], 1);
+	else {						//if the same page is selected again
+		pageMode = 0;			//go to overview
 	}
+
 	updatePage(pageMode);
 }
 
+
+
+
 void 	clearVertButts() {
 	for (int i = 0; i < 8; i++) {
-		
+
 		launchPad.sendNoteOn(vertButts[i], 0, 1);
 		delay(1);
 	}
 }
 
+
+
+
 void setAllVertButts() {
 	for (int i = 0; i < 8; i++) {
-		
+
 		launchPad.sendNoteOn(vertButts[i], trackColours[i], 1);
 		delay(1);
 	}
 }
+
+
+
 
 void updateVertButts() {
 	if (pageMode == 0) {

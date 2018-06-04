@@ -21,6 +21,8 @@ void handleStep() {
 	}
 	sendTracksBuffer64();
 	clearTracksBuffer();
+	//Serial.print("stepDuration =");
+	//Serial.println(stepDuration);
 	//radioSendBuffer();
 }
 

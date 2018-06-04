@@ -8,8 +8,8 @@ void sendWire2microBit(int note) {
 }
 
 void sendWire2microBitTrackAndNote(byte traxx, byte note) {
-	Serial.print("sent track ");
-	Serial.println(traxx);
+	//Serial.print("sent track ");
+	//Serial.println(traxx);
 	trackOrNote = true;
 	noteToSend = note + (traxx << 8);
 	digitalWrite(interruptPin, LOW); //start by telling microbit to request track
@@ -31,8 +31,8 @@ void send64BitInt() {
 	isSending = true;
 	timeOutStamp = millis();
 	delay(1); //change so there is a timer polled and things can be done in background!
-	Serial.print("sent interrupt and currentStep is ");
-	Serial.println(currentStep);
+	//Serial.print("sent interrupt and currentStep is ");
+	//Serial.println(currentStep);
 }
 
 void sendTracksBuffer64() {
@@ -44,8 +44,8 @@ void sendTracksBuffer64() {
 	digitalWrite(interruptPin, LOW); //start by telling microbit to request track
 	isSending = true;
 	timeOutStamp = millis();
-	Serial.print("sent sendTracksBuffer interrupt and currentStep is ");
-	Serial.println(currentStep);
+	//Serial.print("sent sendTracksBuffer interrupt and currentStep is ");
+	//Serial.println(currentStep);
 	delay(1); //change so there is a timer polled and things can be done in background!
 }
 
@@ -53,8 +53,8 @@ void requestEvent() {
 	I2C_writeAnything(dataPacket64);
 	isSending = false;
 	digitalWrite(interruptPin, HIGH);
-	Serial.print("responded and currentStep is ");
-	Serial.println(currentStep);
+	//Serial.print("responded and currentStep is ");
+	//Serial.println(currentStep);
 }
 
 
@@ -63,7 +63,7 @@ void checkTimeOut() {
 	if (millis() - timeOutStamp > timeOut && isSending) {
 		digitalWrite(interruptPin, HIGH);
 		isSending = false;
-		Serial.println(" i2c TIMEOUT! ");
+		//Serial.println(" i2c TIMEOUT! ");
 	}
 }
 

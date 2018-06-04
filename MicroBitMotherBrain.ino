@@ -12,14 +12,18 @@ bool runClock = false;
 bool trackOrNote = false;
 byte trackToSend = 0;
 
+struct MySettings : public midi::DefaultSettings                                 //code to change if running status is disabled
+{
+	static const bool UseRunningStatus = false;                                     // Messes with a lot of stuff!
+};
 
 //MIDI.CREATE_DEFAULT_INSTANCE();
-MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, launchPad);
+MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial1, launchPad, MySettings);
 
 byte scrollOffset = 0;
 
 byte seqMatrix[320]{
-	1,0,0,0,0,0,0,0,	1,0,0,0,0,0,1,0,	127,127,127,127,
+	1,2,3,4,5,5,5,5,	1,0,0,0,0,0,1,0,	127,127,127,127,
 	0,1,0,0,0,0,0,0,	0,0,0,0,0,1,0,0,	127,127,127,127,
 	0,0,1,0,0,0,0,0,	0,1,0,0,1,0,0,0,	127,127,127,127,
 	0,0,0,1,0,0,0,0,	0,0,0,1,0,0,0,0,	127,127,127,127,
@@ -49,7 +53,7 @@ bool buttX = false;
 
 byte tracksBuffer[8] = { 201,202,203,204,205,206,207,208 };
 byte trackColours[8] = { 79,95,127,110,126,109,125,124 };
-
+bool isPoly[8] = { true,true,true,true,true,true ,false ,false };
 
 byte LPMAP[64]{
 	  0,  1,  2,  3,  4,  5,  6,  7,
@@ -94,10 +98,14 @@ const byte buttXpin = 7;
 
 const byte ledApin = 4;
 const byte ledBpin = 5;
+bool forceUpdate = true;
+
 
 
 void setup()
 {
+
+	
 	pinMode(buttApin, INPUT_PULLUP);
 	pinMode(buttBpin, INPUT_PULLUP);
 	pinMode(buttCpin, INPUT_PULLUP);
@@ -119,11 +127,22 @@ void setup()
 	launchPad.setHandleNoteOff(handleLPNoteOff);
 	launchPad.setHandleControlChange(handleLPCC);
 
+	clearPage();
+
 	if (!runClock) {
 		currentStep = 0;
-		changePageMode(pageMode);
 	}
-	changePageMode(pageMode);
+	//changePageMode(pageMode);
+	for (int i = 0; i < 8; i++) {
+		launchPad.sendNoteOn(vertButts[i], trackColours[i], 1);
+		delay(100);
+		Serial.println(i);
+	}
+	//launchPad.sendNoteOff(127, 127, 10);
+	
+	
+	updatePage(0);
+
 }
 
 
@@ -153,7 +172,7 @@ void debugloop() {
 	//sendTracksBuffer64();
 	//send32BitInt();
 	//send64BitInt();
-	//Serial.println("Alive");
+	////Serial.println("Alive");
 	//delay(100);
 	//launchPad.sendNoteOn(1, 0, 1);
 
@@ -180,6 +199,6 @@ void handleKnobsAndButtons() {
 	buttB = digitalRead(buttBpin);
 	buttC = digitalRead(buttCpin);
 	buttX = digitalRead(buttXpin);
-	stepDuration = (2048 - (knobA<<1));
+	stepDuration = (2048 - (knobA << 1));
 }
 
