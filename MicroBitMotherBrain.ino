@@ -47,7 +47,8 @@ bool buttB = false;
 bool buttC = false;
 bool buttX = false;
 
-
+byte tracksBuffer[8] = { 201,202,203,204,205,206,207,208 };
+byte trackColours[8] = { 79,95,127,110,126,109,125,124 };
 
 
 byte LPMAP[64]{
@@ -74,6 +75,8 @@ byte LPtoMatrix[128]{
 };
 
 byte topButts[8] = { 104,105,106,107,108,109,110,111 };
+byte vertButts[8] = { 8,24,40,56,72,88,104,120 };
+
 
 unsigned long clockTimer = 0;
 int stepDuration = 800;
@@ -82,157 +85,101 @@ int currentStep = -1;
 int seqLength = 16;
 bool isSending = false;
 
-const byte buttApin = A3;
+byte pageMode = 0; // 0 = overview, 1 = track one 2 = track2 and so forth
+
+const byte buttApin = 8;
+const byte buttBpin = 9;
+const byte buttCpin = 6;
+const byte buttXpin = 7;
+
+const byte ledApin = 4;
+const byte ledBpin = 5;
+
 
 void setup()
 {
-	//pinMode(buttApin, INPUT_PULLUP);
-
+	pinMode(buttApin, INPUT_PULLUP);
+	pinMode(buttBpin, INPUT_PULLUP);
+	pinMode(buttCpin, INPUT_PULLUP);
+	pinMode(buttXpin, INPUT_PULLUP);
+	pinMode(ledApin, OUTPUT);
+	pinMode(ledBpin, OUTPUT);
+	pinMode(LEDPIN, OUTPUT);
 	pinMode(A0, INPUT);
 	pinMode(A1, INPUT);
+	pinMode(interruptPin, OUTPUT);
+	pinMode(interruptPin2, OUTPUT);
 	Wire.begin(8);                // join i2c bus with address #8
 	launchPad.begin();
-	pinMode(LEDPIN, OUTPUT);
 	launchPad.turnThruOff();
 	Wire.onRequest(requestEvent); // register event
-	pinMode(interruptPin, OUTPUT);
 	digitalWrite(interruptPin, HIGH); //the microbit registers falling edge
-	pinMode(interruptPin2, OUTPUT);
 	digitalWrite(interruptPin2, HIGH); //the microbit registers falling edge
 	launchPad.setHandleNoteOn(handleLPNoteOn);
 	launchPad.setHandleNoteOff(handleLPNoteOff);
 	launchPad.setHandleControlChange(handleLPCC);
-	//digitalWrite(LEDPIN, HIGH);
+
 	if (!runClock) {
 		currentStep = 0;
-		updatePage();
+		changePageMode(pageMode);
 	}
-
+	changePageMode(pageMode);
 }
 
 
-void handleClock() {
-	if (runClock) {
-		if (millis() > clockTimer + stepDuration) {
-			clockTimer = millis();
-			lastStep = currentStep;
-			currentStep++;
-			currentStep = currentStep % seqLength;
-			handleStep();
-			updatePage();
-		}
-	}
-}
+
 
 
 unsigned long int timeOutStamp = 0;
-byte counter = 0;
+//byte counter = 0;
 // long (32 bit) - signed number from -2,147,483,648 to 2,147,483,647
-byte first = 201;
-byte second = 202;
-byte third = 203;
-byte fourth = 204;
-byte fifth = 205;
-byte sixth = 206;
-byte seventh = 207;
-byte eighth = 208;
+//byte first = 201;
+//byte second = 202;
+//byte third = 203;
+//byte fourth = 204;
+//byte fifth = 205;
+//byte sixth = 206;
+//byte seventh = 207;
+//byte eighth = 208;
 
 unsigned long dataPacket = 1;
 
-void thirtyTwoBitPackingWorks() {
-	dataPacket = first;
-	dataPacket = dataPacket << 8;
-	dataPacket = dataPacket + second;
-	dataPacket = dataPacket << 8;
-	dataPacket = dataPacket + third;
-	dataPacket = dataPacket << 8;
-	dataPacket = dataPacket + fourth;
-
-
-	Serial.print("first = ");
-	Serial.println(first);
-	Serial.print("second = ");
-	Serial.println(second);
-	Serial.print("third = ");
-	Serial.println(third);
-	Serial.print("fourth = ");
-	Serial.println(fourth);
-
-
-	Serial.print("full = ");
-	Serial.println(dataPacket);
-	Serial.println();
-}
-
-
 uint64_t dataPacket64 = 0;
 
-void loop() {
+void debugloop() {
 	delay(2000);
+
+	//launchPad.sendNoteOn(1, 100, 1);
+	//sendTracksBuffer64();
 	//send32BitInt();
-	dataPacket64 = first;
-	dataPacket64 = dataPacket64 << 8;
-	dataPacket64 = dataPacket64 + second;
-	dataPacket64 = dataPacket64 << 8;
-	dataPacket64 = dataPacket64 + third;
-	dataPacket64 = dataPacket64 << 8;
-	dataPacket64 = dataPacket64 + fourth;
-	dataPacket64 = dataPacket64 << 8;
-	dataPacket64 = dataPacket64 + fifth;
-	dataPacket64 = dataPacket64 << 8;
-	dataPacket64 = dataPacket64 + sixth;
-	dataPacket64 = dataPacket64 << 8;
-	dataPacket64 = dataPacket64 + seventh;
-	dataPacket64 = dataPacket64 << 8;
-	dataPacket64 = dataPacket64 + eighth;
-	launchPad.sendNoteOn(1, 100, 1);
-	send64BitInt();
-	Serial.println("Alive");
-	delay(100);
-	launchPad.sendNoteOn(1, 0, 1);
+	//send64BitInt();
+	//Serial.println("Alive");
+	//delay(100);
+	//launchPad.sendNoteOn(1, 0, 1);
 
 }
 
 
-void notloop()
-{
+void loop() {
+#ifdef DEBUG
+	debugLoop();
+#else
 	handleClock();
 	launchPad.read();
 	checkTimeOut(); //reset interruptPin and isSending if the microbit missed the message
 	handleKnobsAndButtons();
+#endif // DEBUG
 }
 
-void datatypeTest() {
-	Serial.print(dataPacket);
-	Serial.print("    -    ");
-	Serial.println(dataPacket, BIN);
-	counter++;
-	Serial.print("counter = ");
-	Serial.println(counter);
-	Serial.print(">> 1 = ");
-	Serial.println(dataPacket >> 1);
-	Serial.println("------------");
-	Serial.println();
-	dataPacket = dataPacket << 1;
-	if (counter > 32) {
-		counter = 0;
-		dataPacket = 1;
-	}
 
-}
 
 void handleKnobsAndButtons() {
 	knobA = analogRead(A1);
 	knobB = analogRead(A0);
-	//buttA = digitalRead(buttApin);
-	//buttB = digitalRead(A4);
-	//buttC = digitalRead(A4);
-	//buttX = digitalRead(A4);
-
-	stepDuration = (1124 - knobA);
-
-
-	Serial.print(" StepDur ");
-	Serial.println(stepDuration);
+	buttA = digitalRead(buttApin);
+	buttB = digitalRead(buttBpin);
+	buttC = digitalRead(buttCpin);
+	buttX = digitalRead(buttXpin);
+	stepDuration = (2048 - (knobA<<1));
 }
 

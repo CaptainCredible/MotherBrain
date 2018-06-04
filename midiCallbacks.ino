@@ -38,18 +38,18 @@ void handleLPCC(byte channel, byte CC, byte val) {
 			clockTimer = millis();
 			if (!runClock) {
 				currentStep = 0;
-				updatePage();
+				updatePage(0); //TODO NEEDS TO BE CONDITIONAL
 			}
-			updatePage();
+			updatePage(0);
 			handleCursor();
 		case 7:
 			currentStep--;
-			updatePage();
+			updatePage(0); //TODO NEEDS TO BE CONDITIONAL
 			handleCursor();
 			break;
 		case 8:
 			currentStep++;
-			updatePage();
+			updatePage(0); //TODO NEEDS TO BE CONDITIONAL
 			handleCursor();
 			break;
 		default:

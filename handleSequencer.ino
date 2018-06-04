@@ -1,17 +1,36 @@
+void handleClock() {
+	if (runClock) {
+		if (millis() > clockTimer + stepDuration) {
+			clockTimer = millis();
+			lastStep = currentStep;
+			currentStep++;
+			currentStep = currentStep % seqLength;
+			handleStep();
+			updatePage(pageMode);
+		}
+	}
+}
+
 
 void handleStep() {
-	for (byte track = 0; track < 16; track++) {					//repeat for every track
+	for (byte track = 0; track < 8; track++) {					//repeat for every track
 		int matrixCursor = currentStep + (track * 20);			//check current step for notes
 		if (seqMatrix[matrixCursor] > 0){						//if there is a note
-			sendWire2microBitTrackAndNote(seqMatrix[matrixCursor],track);			//send that note to microbit (ask microbit to request it.
+			tracksBuffer[track] = seqMatrix[matrixCursor];											//	sendWire2microBitTrackAndNote(seqMatrix[matrixCursor],track);			//send that note to microbit (ask microbit to request it.
 			}
 	}
-	
+	sendTracksBuffer64();
+	clearTracksBuffer();
 	//radioSendBuffer();
 }
-void radioSendBuffer() {
-	sendWire2microBitTrackAndNote(100, 0);			//send that note to microbit (ask microbit to request it.
-	Serial.println(" end");
+
+
+
+
+void clearTracksBuffer() {
+	for (int i = 0; i < 8; i++) {
+		tracksBuffer[i] = 0;
+	}
 }
 
 void radioSendClockTick() {
