@@ -1,3 +1,5 @@
+#define DEBUG
+
 
 #include <MIDI.h>
 #include <Wire.h>
@@ -11,6 +13,8 @@ int noteToSend = 123;
 bool runClock = false;
 bool trackOrNote = false;
 byte trackToSend = 0;
+
+byte dataPacket128[16] = { 221,222,223,224,225,226,227,228,229,230,231,232,233,234,235,236 };
 
 struct MySettings : public midi::DefaultSettings                                 //code to change if running status is disabled
 {
@@ -100,6 +104,7 @@ const byte ledApin = 4;
 const byte ledBpin = 5;
 bool forceUpdate = true;
 
+unsigned long i2cTimer = 0; //for debug
 
 
 void setup()
@@ -120,12 +125,18 @@ void setup()
 	Wire.begin(8);                // join i2c bus with address #8
 	launchPad.begin();
 	launchPad.turnThruOff();
-	Wire.onRequest(requestEvent); // register event
 	digitalWrite(interruptPin, HIGH); //the microbit registers falling edge
 	digitalWrite(interruptPin2, HIGH); //the microbit registers falling edge
 	launchPad.setHandleNoteOn(handleLPNoteOn);
 	launchPad.setHandleNoteOff(handleLPNoteOff);
 	launchPad.setHandleControlChange(handleLPCC);
+#ifdef DEBUG
+	Wire.onRequest(debugRequestEvent); // register event
+#else
+	Wire.onRequest(requestEvent); // register event
+#endif // DEBUG
+
+	
 
 	clearPage();
 
@@ -165,16 +176,16 @@ unsigned long dataPacket = 1;
 
 uint64_t dataPacket64 = 0;
 
-void debugloop() {
-	delay(2000);
+void debugLoop() {
+	delay(5000);
 
-	//launchPad.sendNoteOn(1, 100, 1);
-	//sendTracksBuffer64();
+	launchPad.sendNoteOn(1, 100, 1);
+	sendTracksBuffer64();
 	//send32BitInt();
 	//send64BitInt();
-	////Serial.println("Alive");
-	//delay(100);
-	//launchPad.sendNoteOn(1, 0, 1);
+	Serial.println("Alive");
+	delay(100);
+	launchPad.sendNoteOn(1, 0, 1);
 
 }
 
