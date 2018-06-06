@@ -35,6 +35,16 @@ void send64BitInt() {
 	//Serial.println(currentStep);
 }
 
+void sendTracksBuffer() {
+	digitalWrite(interruptPin, LOW); //start by telling microbit to request track
+	i2cTimer = micros();
+	isSending = true;
+	timeOutStamp = millis();
+	delay(1); //change so there is a timer polled and things can be done in background!
+			  //Serial.print("sent interrupt and currentStep is ");
+			  //Serial.println(currentStep);
+}
+
 void sendTracksBuffer64() {
 	dataPacket64 = 0;
 	for (byte i = 0; i < 8; i++ ) {
@@ -52,7 +62,8 @@ void sendTracksBuffer64() {
 }
 
 void debugRequestEvent() {
-	I2C_writeAnything(dataPacket128);
+	//I2C_writeAnything(dataPacket128);
+	I2C_writeAnything(tracksBuffer16x16);
 	i2cTimer = micros() - i2cTimer;
 	Serial.print("transmission took ");
 	Serial.print(i2cTimer);

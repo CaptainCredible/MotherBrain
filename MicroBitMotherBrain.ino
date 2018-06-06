@@ -15,6 +15,7 @@ bool trackOrNote = false;
 byte trackToSend = 0;
 
 byte dataPacket128[16] = { 221,222,223,224,225,226,227,228,229,230,231,232,233,234,235,236 };
+unsigned int tracksBuffer16x16[16] = { 65001,65002,65003,65004,65005,65006,65007,65008,65009,65010,65011,65012,65013,65014,64015,65016 };
 
 struct MySettings : public midi::DefaultSettings                                 //code to change if running status is disabled
 {
@@ -180,12 +181,13 @@ void debugLoop() {
 	delay(5000);
 
 	launchPad.sendNoteOn(1, 100, 1);
-	sendTracksBuffer64();
+	sendTracksBuffer();
 	//send32BitInt();
 	//send64BitInt();
 	Serial.println("Alive");
 	delay(100);
 	launchPad.sendNoteOn(1, 0, 1);
+	checkTimeOut(); //reset interruptPin and isSending if the microbit missed the message
 
 }
 
