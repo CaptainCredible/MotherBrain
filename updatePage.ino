@@ -25,7 +25,7 @@ void handleTrackPage(byte trackPageToHandle) {
 	byte trackPageWeAreHandling = trackPageToHandle - 1;
 	if (isPoly[trackPageWeAreHandling]) {
 		for (byte col = 0; col < 8; col++) {
-			int seqMatrixCursor = col + (currentPage * 8) + (trackPageWeAreHandling * 20);
+			int seqMatrixCursor = col + (currentPage * 8) + (trackPageWeAreHandling * matrixTrackOffset);
 			int val = seqMatrix[seqMatrixCursor];
 			for (int i = 0; i < 8; i++) {
 				if (bitRead(val, i)) {
@@ -37,7 +37,7 @@ void handleTrackPage(byte trackPageToHandle) {
 	}
 	else {//handle the non poly 127 note tracks
 		for (byte col = 0; col < 8; col++) {
-			int seqMatrixCursor = col + (currentPage * 8) + (trackPageWeAreHandling * 20);
+			int seqMatrixCursor = col + (currentPage * 8) + (trackPageWeAreHandling * matrixTrackOffset);
 			int val = seqMatrix[seqMatrixCursor];
 			if (val > 0) {
 				int LPmatrixCursor = col + ((val - 1) * 8);
@@ -55,7 +55,7 @@ void handleOverviewPage() {
 	for (byte row = 0; row < 8; row++) {
 		for (byte col = 0; col < 8; col++) {
 			byte ledCursor = (row * 8) + col;
-			byte seqMatrixCursor = col + firstStepOfPage + (row * 20);
+			byte seqMatrixCursor = col + firstStepOfPage + (row * matrixTrackOffset);
 			if (seqMatrix[seqMatrixCursor] > 0) {
 				LPSetLed(ledCursor, trackColours[row]);
 				delay(1); //todo make wait in background ?
@@ -67,7 +67,7 @@ void handleOverviewPage() {
 
 byte reset[3] = { 176,0,0 };
 void clearPage() {
-	Serial.println("CLEARED PAGE");
+	//Serial.println("CLEARED PAGE");
 	Serial1.write(reset, 3);
 	//delay(1000);
 
@@ -87,7 +87,6 @@ void handleCursor() {
 	launchPad.sendControlChange(topButts[currentStep % 8], seqLedColour, 1);
 }
 
-
 void changePageMode(byte newMode) {
 	//Serial.print("changed pagemode to ");
 
@@ -102,9 +101,6 @@ void changePageMode(byte newMode) {
 	updatePage(pageMode);
 }
 
-
-
-
 void 	clearVertButts() {
 	for (int i = 0; i < 8; i++) {
 
@@ -113,12 +109,8 @@ void 	clearVertButts() {
 	}
 }
 
-
-
-
 void setAllVertButts() {
 	for (int i = 0; i < 8; i++) {
-
 		launchPad.sendNoteOn(vertButts[i], trackColours[i], 1);
 		delay(1);
 	}

@@ -28,10 +28,6 @@ void handleLPNoteOn(byte channel, byte pitch, byte velocity) {
 	default:
 		byte rowPressed = (pitch >> 4) + scrollOffset;
 		byte colPressed = pitch % 8;
-		//Serial.print("row = ");
-		//Serial.print(rowPressed);
-		//Serial.print("  col = ");
-		//Serial.println(colPressed);
 		////////////////////////////////////////////////////////////////
 
 
@@ -51,7 +47,7 @@ void handleLPNoteOn(byte channel, byte pitch, byte velocity) {
 
 		else { //if page mode isnt 0, we are not in overview mode and note
 			byte trackSelector = pageMode - 1; // this is the track we are writing to basically
-			int matrixCursor = LPtoMatrix[pitch % 16] + (currentPage * 8) + trackSelector * 20; //this is what matrix entry we are editing
+			int matrixCursor = LPtoMatrix[pitch % 16] + (currentPage * 8) + trackSelector *matrixTrackOffset; //this is what matrix entry we are editing
 			Serial.print("isPoly = ");
 			Serial.println(isPoly[trackSelector]);
 			if (isPoly[trackSelector]) {							//if this is a polyphonic 8 output track

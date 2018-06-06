@@ -1,69 +1,68 @@
 
+
+
+/*
+
 void sendWire2microBit(int note) {
-	noteToSend = note;
-	trackOrNote = false;
-	digitalWrite(interruptPin, LOW);
-	isSending = true;
-	timeOutStamp = millis();
-}
-
-void sendWire2microBitTrackAndNote(byte traxx, byte note) {
-	//Serial.print("sent track ");
-	//Serial.println(traxx);
-	trackOrNote = true;
-	noteToSend = note + (traxx << 8);
-	digitalWrite(interruptPin, LOW); //start by telling microbit to request track
-	isSending = true;
-	timeOutStamp = millis();
-	delay(2); //change so there is a timer polled and things can be done in background!
-	
-}
-
-void send32BitInt(){
-	digitalWrite(interruptPin, LOW); //start by telling microbit to request track
-	isSending = true;
-	timeOutStamp = millis();
-	delay(1); //change so there is a timer polled and things can be done in background!
+noteToSend = note;
+trackOrNote = false;
+digitalWrite(interruptPin, LOW);
+isSending = true;
+timeOutStamp = millis();
 }
 
 void send64BitInt() {
-	digitalWrite(interruptPin, LOW); //start by telling microbit to request track
-	isSending = true;
-	timeOutStamp = millis();
-	delay(1); //change so there is a timer polled and things can be done in background!
-	//Serial.print("sent interrupt and currentStep is ");
-	//Serial.println(currentStep);
+digitalWrite(interruptPin, LOW); //start by telling microbit to request track
+isSending = true;
+timeOutStamp = millis();
+delay(1); //change so there is a timer polled and things can be done in background!
 }
 
-void sendTracksBuffer() {
-	digitalWrite(interruptPin, LOW); //start by telling microbit to request track
-	i2cTimer = micros();
-	isSending = true;
-	timeOutStamp = millis();
-	delay(1); //change so there is a timer polled and things can be done in background!
-			  //Serial.print("sent interrupt and currentStep is ");
-			  //Serial.println(currentStep);
+void send32BitInt(){
+digitalWrite(interruptPin, LOW); //start by telling microbit to request track
+isSending = true;
+timeOutStamp = millis();
+delay(1); //change so there is a timer polled and things can be done in background!
 }
 
 void sendTracksBuffer64() {
-	dataPacket64 = 0;
-	for (byte i = 0; i < 8; i++ ) {
-		dataPacket64 = dataPacket64 << 8;
-		dataPacket64 = dataPacket64 + tracksBuffer[i];
-	}
-	
+dataPacket64 = 0;
+for (byte i = 0; i < 8; i++ ) {
+dataPacket64 = dataPacket64 << 8;
+dataPacket64 = dataPacket64 + tracksBuffer[i];
+}
+
+digitalWrite(interruptPin, LOW); //start by telling microbit to request track
+i2cTimer = micros();
+isSending = true;
+timeOutStamp = millis();
+//Serial.print("sent sendTracksBuffer interrupt and currentStep is ");
+//Serial.println(currentStep);
+//delay(1); //change so there is a timer polled and things can be done in background!
+}
+
+void sendWire2microBitTrackAndNote(byte traxx, byte note) {
+trackOrNote = true;
+noteToSend = note + (traxx << 8);
+digitalWrite(interruptPin, LOW); //start by telling microbit to request track
+isSending = true;
+timeOutStamp = millis();
+delay(2); //change so there is a timer polled and things can be done in background!
+}
+
+*/
+
+unsigned long i2cFails = 0;
+unsigned long successfullI2cs = 0;
+
+void sendTracksBuffer() {
 	digitalWrite(interruptPin, LOW); //start by telling microbit to request track
-	i2cTimer = micros();
+	//i2cTimer = micros();
 	isSending = true;
 	timeOutStamp = millis();
-	//Serial.print("sent sendTracksBuffer interrupt and currentStep is ");
-	//Serial.println(currentStep);
-	//delay(1); //change so there is a timer polled and things can be done in background!
 }
 
 void debugRequestEvent() {
-	//I2C_writeAnything(dataPacket128);
-	I2C_writeAnything(tracksBuffer16x16);
 	i2cTimer = micros() - i2cTimer;
 	Serial.print("transmission took ");
 	Serial.print(i2cTimer);
@@ -71,21 +70,30 @@ void debugRequestEvent() {
 	isSending = false;
 	digitalWrite(interruptPin, HIGH);
 }
+
+
+
 void requestEvent() {
-	I2C_writeAnything(dataPacket64);
+	I2C_writeAnything(tracksBuffer16x8);
 	isSending = false;
 	digitalWrite(interruptPin, HIGH);
-	//Serial.print("responded and currentStep is ");
-	//Serial.println(currentStep);
+	Serial.print("i2c OK! ");
+	successfullI2cs++;
+	Serial.print(successfullI2cs);
+	Serial.print("   fails ");
+	Serial.println(i2cFails);
 }
 
 
-#define timeOut  1000
+
+
+#define timeOut  10
 void checkTimeOut() {
 	if (millis() - timeOutStamp > timeOut && isSending) {
 		digitalWrite(interruptPin, HIGH);
 		isSending = false;
-		//Serial.println(" i2c TIMEOUT! ");
+		Serial.println(" i2c TIMEOUT! ");
+		i2cFails++;
 	}
 }
 

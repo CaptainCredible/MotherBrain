@@ -1,4 +1,4 @@
-#define DEBUG
+//#define DEBUG
 
 
 #include <MIDI.h>
@@ -8,6 +8,7 @@
 #define LEDPIN 14
 #define interruptPin 16
 #define interruptPin2 10
+
 byte colour = 45;
 int noteToSend = 123;
 bool runClock = false;
@@ -15,7 +16,7 @@ bool trackOrNote = false;
 byte trackToSend = 0;
 
 byte dataPacket128[16] = { 221,222,223,224,225,226,227,228,229,230,231,232,233,234,235,236 };
-unsigned int tracksBuffer16x16[16] = { 65001,65002,65003,65004,65005,65006,65007,65008,65009,65010,65011,65012,65013,65014,64015,65016 };
+unsigned int tracksBuffer16x8[8] = { 65001,65002,65003,65004,65005,65006,65007,65008 };
 
 struct MySettings : public midi::DefaultSettings                                 //code to change if running status is disabled
 {
@@ -27,9 +28,21 @@ MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial1, launchPad, MySettings);
 
 byte scrollOffset = 0;
 
-byte seqMatrix[320]{
-	1,2,3,4,5,5,5,5,	1,0,0,0,0,0,1,0,	127,127,127,127,
-	0,1,0,0,0,0,0,0,	0,0,0,0,0,1,0,0,	127,127,127,127,
+
+int seqMatrix[256] = {
+	1,0,0,5,0,0,0,0,	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,
+	0,2,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,
+	0,0,2,0,0,0,0,0,	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,
+	0,0,0,1,0,0,0,0,	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,
+};
+
+byte oldSeqMatrix[320] = {
+	1,2,3,4,5,0,0,0,	1,0,0,0,0,0,1,0,	127,127,127,127,
+	0,0,0,0,0,0,0,0,	0,0,0,0,0,1,0,0,	127,127,127,127,
 	0,0,1,0,0,0,0,0,	0,1,0,0,1,0,0,0,	127,127,127,127,
 	0,0,0,1,0,0,0,0,	0,0,0,1,0,0,0,0,	127,127,127,127,
 	0,0,0,0,1,0,0,0,	0,0,1,0,0,0,0,0,	127,127,127,127,
@@ -45,6 +58,11 @@ byte seqMatrix[320]{
 	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	127,127,127,127,
 	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	127,127,127,127,
 };
+#define numberOfTracks 8
+#define matrixTrackOffset 32
+
+
+
 byte prevPage = 100;
 byte currentPage = 0;
 byte firstStepOfPage = 0;
@@ -72,6 +90,18 @@ byte LPMAP[64]{
 };
 
 byte LPtoMatrix[128]{
+	0,  1,  2,  3,  4,  5,  6,  7,		-1,-1,-1,-1,-1,-1,-1,-1,
+	32, 33, 34, 35, 36, 37, 38, 39,		-1,-1,-1,-1,-1,-1,-1,-1,
+	64, 65, 66, 67, 68, 69, 70, 71,		-1,-1,-1,-1,-1,-1,-1,-1,
+	96, 97, 98, 99,100,101,102,103,		-1,-1,-1,-1,-1,-1,-1,-1,
+
+	128,129,130,131,132,133,134,136,	-1,-1,-1,-1,-1,-1,-1,-1,
+	160,161,162,163,164,165,166,167,	-1,-1,-1,-1,-1,-1,-1,-1,
+	192,193,194,195,196,197,198,199,	-1,-1,-1,-1,-1,-1,-1,-1,
+	224,225,226,227,228,229,230,231,	-1,-1,-1,-1,-1,-1,-1,-1
+};
+
+byte oldLPtoMatrix[128]{
 	  0,  1,  2,  3,  4,  5,  6,  7,	-1,-1,-1,-1,-1,-1,-1,-1,
 	 20, 21, 22, 23, 24, 25, 26, 27,	-1,-1,-1,-1,-1,-1,-1,-1,
 	 40, 41, 42, 43, 44, 45, 46, 47,	-1,-1,-1,-1,-1,-1,-1,-1,
@@ -91,7 +121,7 @@ unsigned long clockTimer = 0;
 int stepDuration = 800;
 int lastStep = 200;
 int currentStep = -1;
-int seqLength = 16;
+int seqLength = 32;
 bool isSending = false;
 
 byte pageMode = 0; // 0 = overview, 1 = track one 2 = track2 and so forth
@@ -148,13 +178,10 @@ void setup()
 	for (int i = 0; i < 8; i++) {
 		launchPad.sendNoteOn(vertButts[i], trackColours[i], 1);
 		delay(100);
-		Serial.println(i);
+		//Serial.println(i);
 	}
 	//launchPad.sendNoteOff(127, 127, 10);
-	
-	
 	updatePage(0);
-
 }
 
 
@@ -175,7 +202,7 @@ unsigned long int timeOutStamp = 0;
 
 unsigned long dataPacket = 1;
 
-uint64_t dataPacket64 = 0;
+//uint64_t dataPacket64 = 0;
 
 void debugLoop() {
 	delay(5000);
@@ -204,6 +231,7 @@ void loop() {
 }
 
 
+#define minStepDuration 20
 
 void handleKnobsAndButtons() {
 	knobA = analogRead(A1);
@@ -212,6 +240,6 @@ void handleKnobsAndButtons() {
 	buttB = digitalRead(buttBpin);
 	buttC = digitalRead(buttCpin);
 	buttX = digitalRead(buttXpin);
-	stepDuration = (2048 - (knobA << 1));
+	stepDuration = ((2048+minStepDuration) - (knobA << 1));
 }
 
