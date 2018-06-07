@@ -40,6 +40,8 @@ int seqMatrix[256] = {
 	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,
 };
 
+int seqLength = 16;
+
 byte oldSeqMatrix[320] = {
 	1,2,3,4,5,0,0,0,	1,0,0,0,0,0,1,0,	127,127,127,127,
 	0,0,0,0,0,0,0,0,	0,0,0,0,0,1,0,0,	127,127,127,127,
@@ -121,7 +123,6 @@ unsigned long clockTimer = 0;
 int stepDuration = 800;
 int lastStep = 200;
 int currentStep = -1;
-int seqLength = 32;
 bool isSending = false;
 
 byte pageMode = 0; // 0 = overview, 1 = track one 2 = track2 and so forth
@@ -241,5 +242,6 @@ void handleKnobsAndButtons() {
 	buttC = digitalRead(buttCpin);
 	buttX = digitalRead(buttXpin);
 	stepDuration = ((2048+minStepDuration) - (knobA << 1));
+	//stepDuration = ((5048 + minStepDuration) - (knobA << 1));
 }
 

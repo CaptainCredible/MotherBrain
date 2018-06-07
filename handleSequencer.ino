@@ -14,9 +14,10 @@ void handleClock() {
 void handleStep() {
 	for (byte track = 0; track < numberOfTracks; track++) {					//repeat for every track 0-15
 		int matrixCursor = currentStep + (track * matrixTrackOffset);			//check current step for notes
-		if (seqMatrix[matrixCursor] > 0){						//if there is a note
-			tracksBuffer[track] = seqMatrix[matrixCursor];											//	sendWire2microBitTrackAndNote(seqMatrix[matrixCursor],track);			//send that note to microbit (ask microbit to request it.
-			}
+		tracksBuffer16x8[track] = seqMatrix[matrixCursor];											//	sendWire2microBitTrackAndNote(seqMatrix[matrixCursor],track);			//send that note to microbit (ask microbit to request it.
+		//if (seqMatrix[matrixCursor] > 0){						//if there is a note
+			
+		//	}
 	}
 	sendTracksBuffer();
 }
