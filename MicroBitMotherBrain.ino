@@ -16,7 +16,7 @@ bool trackOrNote = false;
 byte trackToSend = 0;
 
 byte dataPacket128[16] = { 221,222,223,224,225,226,227,228,229,230,231,232,233,234,235,236 };
-unsigned int tracksBuffer16x8[8] = { 65001,65002,65003,65004,65005,65006,65007,65008 };
+unsigned int tracksBuffer16x8[9] = { 65001,65002,65003,65004,65005,65006,65007,65008 };
 
 struct MySettings : public midi::DefaultSettings                                 //code to change if running status is disabled
 {
@@ -232,7 +232,7 @@ void loop() {
 }
 
 
-#define minStepDuration 20
+#define minStepDuration 33
 
 void handleKnobsAndButtons() {
 	knobA = analogRead(A1);
@@ -241,7 +241,7 @@ void handleKnobsAndButtons() {
 	buttB = digitalRead(buttBpin);
 	buttC = digitalRead(buttCpin);
 	buttX = digitalRead(buttXpin);
-	stepDuration = ((2048+minStepDuration) - (knobA << 1));
-	//stepDuration = ((5048 + minStepDuration) - (knobA << 1));
+	//stepDuration = ((2048+minStepDuration) - (knobA << 1));
+	stepDuration = ((2048 + minStepDuration) - (knobA << 1));
 }
 

@@ -19,6 +19,8 @@ void handleStep() {
 			
 		//	}
 	}
+	tracksBuffer16x8[8] = currentStep;
+	Serial.println(tracksBuffer16x8[8]);
 	sendTracksBuffer();
 }
 
