@@ -40,7 +40,8 @@ int seqMatrix[256] = {
 	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,
 };
 
-int seqLength = 16;
+int seqLength = 16; // temporary debug seqlength, needs to be settable by user
+//needs to lock stably, perhaps knob is not best solution
 
 byte oldSeqMatrix[320] = {
 	1,2,3,4,5,0,0,0,	1,0,0,0,0,0,1,0,	127,127,127,127,

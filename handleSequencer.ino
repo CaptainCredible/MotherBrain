@@ -19,7 +19,7 @@ void handleStep() {
 			
 		//	}
 	}
-	tracksBuffer16x8[8] = currentStep;
+	tracksBuffer16x8[8] = currentStep; //slot number eight is where we send the current step number
 	Serial.println(tracksBuffer16x8[8]);
 	sendTracksBuffer();
 }

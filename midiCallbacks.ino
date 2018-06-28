@@ -102,24 +102,22 @@ void handleLPCC(byte channel, byte CC, byte val) {
 			runClock = !runClock;
 			break;
 		case 6:
-			currentStep = 255;
-			handleStep();
-			clockTimer = millis();
-			if (!runClock) {
-				currentStep = 0;
-				updatePage(0); //TODO NEEDS TO BE CONDITIONAL
-			}
-			updatePage(0);
-			handleCursor();
+			
 		case 7:
-			currentStep--;
-			updatePage(0); //TODO NEEDS TO BE CONDITIONAL
-			handleCursor();
+			scrollOffset++;
+			if (scrollOffset > 8) {
+				scrollOffset = 8;   //limit scrollOffset to 0-7
+			}
+			forceUpdate = true;
+			updatePage(currentPage);
 			break;
 		case 8:
-			currentStep++;
-			updatePage(0); //TODO NEEDS TO BE CONDITIONAL
-			handleCursor();
+			scrollOffset--;
+			if (scrollOffset > 8) {
+				scrollOffset = 0;    //if we subtracted one from scrollOffset and it is greater than seven, it means its rolled over and we want to set it back to 0;
+			}
+			forceUpdate = true;
+			updatePage(currentPage);
 			break;
 		default:
 			trackToSend = buttWasPressed - 1;

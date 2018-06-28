@@ -1,5 +1,5 @@
 byte oldPageMode = 0;
-void updatePage(byte mode) { // force is a boolean to force a page update even if its not a page flip
+void updatePage(byte mode) { // forceUpdate is a boolean to force a page update even if its not a page flip
 	if (currentPage != (currentStep >> 3) || forceUpdate || pageMode != oldPageMode) { //Time to flip the page
 		clearPage();
 		oldPageMode = mode;
@@ -22,14 +22,15 @@ void updatePage(byte mode) { // force is a boolean to force a page update even i
 }
 
 void handleTrackPage(byte trackPageToHandle) {
-	byte trackPageWeAreHandling = trackPageToHandle - 1;
+	byte trackPageWeAreHandling = trackPageToHandle - 1; //move 1-8 to 0-7
 	if (isPoly[trackPageWeAreHandling]) {
-		for (byte col = 0; col < 8; col++) {
+		for (byte col = 0; col < 8; col++) {             
 			int seqMatrixCursor = col + (currentPage * 8) + (trackPageWeAreHandling * matrixTrackOffset);
 			int val = seqMatrix[seqMatrixCursor];
-			for (int i = 0; i < 8; i++) {
-				if (bitRead(val, i)) {
-					int currentLedCursor = col + (8 * i); // where to point on the LPMAP array
+			for (int i = 0 ; i < 8; i++) {
+				if (bitRead(val, i + scrollOffset)) {
+					int currentLedCursor = col + (8 * i
+						); // where to point on the LPMAP array
 					LPSetLed(currentLedCursor, trackColours[trackPageWeAreHandling]);
 				}
 			}
