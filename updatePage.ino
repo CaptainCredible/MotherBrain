@@ -1,4 +1,6 @@
 byte oldPageMode = 0;
+
+//need to separate curentpage from viewpage
 void updatePage(byte mode) { // forceUpdate is a boolean to force a page update even if its not a page flip
 	if (currentPage != (currentStep >> 3) || forceUpdate || pageMode != oldPageMode) { //Time to flip the page
 		clearPage();

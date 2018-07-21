@@ -62,6 +62,12 @@ void sendTracksBuffer() {
 	timeOutStamp = millis();
 }
 
+void sendUsbMidiPackage() {
+	sentAMidiBuffer = true; //flag the fact that we are sending midi buffer
+	sendTracksBuffer();
+}
+
+
 void debugRequestEvent() {
 	i2cTimer = micros() - i2cTimer;
 	Serial.print("transmission took ");
@@ -74,7 +80,13 @@ void debugRequestEvent() {
 
 
 void requestEvent() {
-	I2C_writeAnything(tracksBuffer16x8);
+	if (sentAMidiBuffer) {
+		I2C_writeAnything(midiTracksBuffer16x8);
+	}
+	else {
+		I2C_writeAnything(tracksBuffer16x8);
+	}
+	
 	isSending = false;
 	digitalWrite(interruptPin, HIGH);
 	Serial.print("i2c OK! ");
@@ -82,6 +94,14 @@ void requestEvent() {
 	Serial.print(successfullI2cs);
 	Serial.print("   fails ");
 	Serial.println(i2cFails);
+
+	if (sentAMidiBuffer) {											//if we sent a midi buffer
+		for (byte i = 0; i < 7; i++) {								//for every channel entry in buffer
+			midiTracksBuffer16x8[i] = 0;							// clear buffer
+		}
+		Serial.println("erased midibuffer");
+		sentAMidiBuffer = false;									//set flag back to normal buffers.
+	}
 }
 
 

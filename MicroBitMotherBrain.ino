@@ -9,6 +9,16 @@
 #define interruptPin 16
 #define interruptPin2 10
 
+bool internalClockSelect = false;
+bool midiClockRunning = false;
+#define TICK 15
+#define RESTART 3
+const byte NOTEON = 0x09;
+const byte NOTEOFF = 0x08;
+const byte MCLOCKTICK = 0x03;
+
+bool sentAMidiBuffer = false;
+
 byte colour = 45;
 int noteToSend = 123;
 bool runClock = false;
@@ -16,7 +26,8 @@ bool trackOrNote = false;
 byte trackToSend = 0;
 
 byte dataPacket128[16] = { 221,222,223,224,225,226,227,228,229,230,231,232,233,234,235,236 };
-unsigned int tracksBuffer16x8[9] = { 65001,65002,65003,65004,65005,65006,65007,65008 };
+unsigned int tracksBuffer16x8[9] = { 65001,65002,65003,65004,65005,65006,65007,65008 }; //last one used for currentStep, so receivers need to be able to determine that we are not setting step number!
+unsigned int midiTracksBuffer16x8[9] = { 65001,65002,65003,65004,65005,65006,65007,65008 }; //last one used for currentStep, so receivers need to be able to determine that we are not setting step number!
 
 struct MySettings : public midi::DefaultSettings                                 //code to change if running status is disabled
 {
@@ -79,7 +90,7 @@ bool buttX = false;
 
 byte tracksBuffer[8] = { 201,202,203,204,205,206,207,208 };
 byte trackColours[8] = { 79,95,127,110,126,109,125,124 };
-bool isPoly[8] = { true,true,true,true,true,true ,false ,false };
+bool isPoly[8] = { true,true,true,true,true,true ,false ,false }; // this equates to midi channel 1,2,3,4,5,6 as poly and 7+8 ,9+10, as mono channels sharing same int in the buffer
 
 byte LPMAP[64]{
 	  0,  1,  2,  3,  4,  5,  6,  7,
@@ -229,7 +240,9 @@ void loop() {
 	launchPad.read();
 	checkTimeOut(); //reset interruptPin and isSending if the microbit missed the message
 	handleKnobsAndButtons();
+	usbmidiprocessing();
 #endif // DEBUG
+	
 }
 
 

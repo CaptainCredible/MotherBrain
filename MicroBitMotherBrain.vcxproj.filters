@@ -21,6 +21,7 @@
     <None Include="debug.ino" />
     <None Include="updatePage.ino" />
     <None Include="comms.ino" />
+    <None Include="HandleUSBMidi.ino" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.MicroBitMotherBrain.vsarduino.h">
