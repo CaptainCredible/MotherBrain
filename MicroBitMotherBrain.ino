@@ -9,6 +9,7 @@
 #define interruptPin 16
 #define interruptPin2 10
 
+bool SHIFT = false;
 bool internalClockSelect = false;
 bool midiClockRunning = false;
 #define TICK 15
@@ -16,6 +17,8 @@ bool midiClockRunning = false;
 const byte NOTEON = 0x09;
 const byte NOTEOFF = 0x08;
 const byte MCLOCKTICK = 0x03;
+
+const byte pageDisplayCol = 16;
 
 bool sentAMidiBuffer = false;
 
@@ -53,6 +56,7 @@ int seqMatrix[256] = {
 
 int seqLength = 16; // temporary debug seqlength, needs to be settable by user
 //needs to lock stably, perhaps knob is not best solution
+byte numberOfPages = seqLength >> 3;
 
 byte oldSeqMatrix[320] = {
 	1,2,3,4,5,0,0,0,	1,0,0,0,0,0,1,0,	127,127,127,127,
@@ -79,7 +83,11 @@ byte oldSeqMatrix[320] = {
 
 byte prevPage = 100;
 byte currentPage = 0;
+byte pageSelect = 0;
+byte viewPage = 0;
 byte firstStepOfPage = 0;
+bool follow = true;
+
 
 int knobA = 0;
 int knobB = 0;
@@ -180,6 +188,9 @@ void setup()
 	Wire.onRequest(requestEvent); // register event
 #endif // DEBUG
 
+	digitalWrite(ledBpin, follow);
+	
+		
 	
 
 	clearPage();
@@ -251,11 +262,13 @@ void loop() {
 void handleKnobsAndButtons() {
 	knobA = analogRead(A1);
 	knobB = analogRead(A0);
-	buttA = digitalRead(buttApin);
-	buttB = digitalRead(buttBpin);
-	buttC = digitalRead(buttCpin);
-	buttX = digitalRead(buttXpin);
+	buttA = !digitalRead(buttApin);
+	buttB = !digitalRead(buttBpin);
+	buttC = !digitalRead(buttCpin);
+	buttX = !digitalRead(buttXpin);
+	SHIFT = buttX;
 	//stepDuration = ((2048+minStepDuration) - (knobA << 1));
 	stepDuration = ((2048 + minStepDuration) - (knobA << 1));
+//	Serial.println(buttX);
 }
 

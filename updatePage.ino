@@ -2,22 +2,40 @@ byte oldPageMode = 0;
 
 //need to separate curentpage from viewpage
 void updatePage(byte mode) { // forceUpdate is a boolean to force a page update even if its not a page flip
-	if (currentPage != (currentStep >> 3) || forceUpdate || pageMode != oldPageMode) { //Time to flip the page
-		clearPage();
-		oldPageMode = mode;
-		forceUpdate = false;
-		digitalWrite(ledApin, forceUpdate);
-		//Serial.print("REDRAW   mode = ");
-		//Serial.println(pageMode);
-		prevPage = currentPage;
-		currentPage = currentStep >> 3;
-		firstStepOfPage = currentPage * 8;
-		updateVertButts();
-		if (pageMode == 0) {
-			handleOverviewPage();
+	if (follow) {    //if we are in follow mode, the page should correspond to the page the cursor is on. 
+		if (currentPage != (currentStep >> 3) || forceUpdate || pageMode != oldPageMode) { //Time to flip the page
+			clearPage();
+			oldPageMode = mode;
+			forceUpdate = false;
+			digitalWrite(ledApin, forceUpdate);
+			prevPage = currentPage;
+			currentPage = currentStep >> 3;
+			firstStepOfPage = currentPage * 8;
+			updateVertButts();
+			if (pageMode == 0) {
+				handleOverviewPage();
+			}
+			else {
+				handleTrackPage(pageMode);
+			}
 		}
-		else {
-			handleTrackPage(pageMode);
+	}
+	else {  // if we are not in follow mode
+		if (currentPage != (pageSelect) || forceUpdate || pageMode != oldPageMode) { //Time to flip the page
+			clearPage();
+			oldPageMode = mode;
+			forceUpdate = false;
+			//digitalWrite(ledApin, forceUpdate);
+			prevPage = currentPage;
+			currentPage = pageSelect;
+			firstStepOfPage = currentPage * 8;
+			updateVertButts();
+			if (pageMode == 0) {
+				handleOverviewPage();
+			}
+			else {
+				handleTrackPage(pageMode);
+			}
 		}
 	}
 	handleCursor();
@@ -84,10 +102,19 @@ void LPSetLedRaw(byte led, byte colour) {
 	launchPad.sendNoteOn(led, colour, 1);
 }
 
-byte seqLedColour = 101;
+
+void displayPagenumber() {
+
+}
+
+byte seqLedColour = 3;
 void handleCursor() {
-	launchPad.sendControlChange(topButts[lastStep % 8], 0, 1);
-	launchPad.sendControlChange(topButts[currentStep % 8], seqLedColour, 1);
+	byte colChanger = 0;
+	if (currentPage == currentStep >> 3) {
+		launchPad.sendControlChange(topButts[lastStep % 8], 0, 1);
+		launchPad.sendControlChange(topButts[currentStep % 8], seqLedColour - colChanger, 1);
+	}
+	
 }
 
 void changePageMode(byte newMode) {

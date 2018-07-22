@@ -99,10 +99,43 @@ void handleLPCC(byte channel, byte CC, byte val) {
 		switch (buttWasPressed)
 		{
 		case 1:
-			runClock = !runClock;
+			if (!SHIFT) {
+				runClock = !runClock;
+			}
+			else {
+				currentStep = -1;
+				clockTimer = -1;
+				updatePage(pageMode);
+			}			
 			break;
-		case 6:
+		case 4: //this is the follow on off button
+			follow = !follow;
+			digitalWrite(ledBpin, follow);
+			break;
+
+		case 5:
 			
+			if (pageSelect== 0){				//if we are already at page 0
+				pageSelect = numberOfPages-1;	//go back to last page
+			}
+			else {
+				pageSelect--;					//else decrement page by one
+			}
+			updatePage(pageMode);
+			Serial.print("pageSelect = ");
+			Serial.println(pageSelect);
+			break;
+
+		case 6:
+			pageSelect++;
+			if (pageSelect >= numberOfPages) {
+				pageSelect = 0;
+			}
+			updatePage(pageMode);
+			Serial.print("pageSelect = ");
+			Serial.println(pageSelect);
+			break;
+
 		case 7:
 			scrollOffset++;
 			if (scrollOffset > 8) {
