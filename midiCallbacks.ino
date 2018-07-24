@@ -85,7 +85,7 @@ void handleLPNoteOn(byte channel, byte pitch, byte velocity) {
 	}
 
 
-	//handleCursor();
+	//handleTopLeds();
 }
 
 void handleLPNoteOff(byte channel, byte pitch, byte velocity) {
@@ -110,7 +110,8 @@ void handleLPCC(byte channel, byte CC, byte val) {
 			break;
 		case 4: //this is the follow on off button
 			follow = !follow;
-			digitalWrite(ledBpin, follow);
+			launchPad.sendControlChange(107, 32 * follow, 1);
+			//digitalWrite(ledBpin, follow);
 			break;
 
 		case 5:

@@ -187,8 +187,6 @@ void setup()
 #else
 	Wire.onRequest(requestEvent); // register event
 #endif // DEBUG
-
-	digitalWrite(ledBpin, follow);
 	
 		
 	

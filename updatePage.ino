@@ -38,7 +38,7 @@ void updatePage(byte mode) { // forceUpdate is a boolean to force a page update 
 			}
 		}
 	}
-	handleCursor();
+	handleTopLeds();
 }
 
 void handleTrackPage(byte trackPageToHandle) {
@@ -107,12 +107,33 @@ void displayPagenumber() {
 
 }
 
-byte seqLedColour = 3;
+void handleTopLeds() {
+	handleWhiteLeds();
+	handleCursor();
+	byte colChanger = 0;
+	if (follow) {
+		if (currentStep%8 == 3){
+			colChanger = 1;
+		}
+		launchPad.sendControlChange(107, 32-colChanger, 1);
+	}
+}
+
+void handleWhiteLeds() {  //these leds show what page we are on (up to four)
+	byte pageThatSeqIsOn = currentStep >> 3;
+	digitalWrite(ledApin, bitRead(pageThatSeqIsOn, 0));
+	digitalWrite(ledBpin, bitRead(pageThatSeqIsOn, 1));
+}
+
+#define seqLedColour 3
 void handleCursor() {
 	byte colChanger = 0;
 	if (currentPage == currentStep >> 3) {
 		launchPad.sendControlChange(topButts[lastStep % 8], 0, 1);
 		launchPad.sendControlChange(topButts[currentStep % 8], seqLedColour - colChanger, 1);
+	}
+	else if (currentPage == lastStep >> 3) {
+		launchPad.sendControlChange(topButts[lastStep % 8], 0, 1);
 	}
 	
 }
@@ -145,7 +166,6 @@ void setAllVertButts() {
 		delay(1);
 	}
 }
-
 
 
 
