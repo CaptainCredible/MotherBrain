@@ -43,19 +43,22 @@ MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial1, launchPad, MySettings);
 byte scrollOffset = 0;
 
 
-int seqMatrix[256] = {
-	1,0,0,5,0,0,0,0,	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,
-	0,2,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,
-	0,0,2,0,0,0,0,0,	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,
-	0,0,0,1,0,0,0,0,	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,
-};
 
-int seqLength = 16; // temporary debug seqlength, needs to be settable by user
+int seqMatrix[256] = {
+0,0,0,1,0,0,0,0,	0,1,1,1,1,0,0,0,	0,1,1,1,1,1,0,0,	0,1,0,0,0,1,0,0,
+0,0,0,1,0,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,	0,1,0,0,0,1,0,0,
+0,0,0,1,0,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,	0,1,0,0,0,1,0,0,
+0,0,0,1,0,0,0,0,	0,0,0,0,0,1,0,0,	0,0,1,1,1,1,0,0,	0,1,1,1,1,1,0,0,
+0,0,0,1,0,0,0,0,	0,0,0,0,1,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,
+0,0,0,1,0,0,0,0,	0,0,0,1,0,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,
+0,0,0,1,0,0,0,0,	0,0,1,0,0,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,
+0,0,0,1,0,0,0,0,	0,1,1,1,1,1,1,0,	0,1,1,1,1,1,0,0,	0,0,0,0,0,1,0,0};
+
+int seqLength = 32; // temporary debug seqlength, needs to be settable by user
 //needs to lock stably, perhaps knob is not best solution
+
+
+
 byte numberOfPages = seqLength >> 3;
 
 byte oldSeqMatrix[320] = {
@@ -266,7 +269,12 @@ void handleKnobsAndButtons() {
 	buttX = !digitalRead(buttXpin);
 	SHIFT = buttX;
 	//stepDuration = ((2048+minStepDuration) - (knobA << 1));
-	stepDuration = ((2048 + minStepDuration) - (knobA << 1));
+	if (SHIFT) {
+		stepDuration = ((2048 + minStepDuration) - (knobA << 1));
+	}
+	
+	//Serial.print("stepDuration ");
+	//Serial.println(stepDuration);
 //	Serial.println(buttX);
 }
 

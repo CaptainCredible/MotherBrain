@@ -77,7 +77,14 @@ void debugRequestEvent() {
 	digitalWrite(interruptPin, HIGH);
 }
 
+void measureI2CSuccessRate() {
+	Serial.print("i2c OK! ");
+	successfullI2cs++;
+	Serial.print(successfullI2cs);
+	Serial.print("   fails ");
+	Serial.println(i2cFails);
 
+}
 
 void requestEvent() {
 	if (sentAMidiBuffer) {
@@ -86,20 +93,15 @@ void requestEvent() {
 	else {
 		I2C_writeAnything(tracksBuffer16x8);
 	}
-	
+	//measureI2CSuccessRate();
 	isSending = false;
 	digitalWrite(interruptPin, HIGH);
-	Serial.print("i2c OK! ");
-	successfullI2cs++;
-	Serial.print(successfullI2cs);
-	Serial.print("   fails ");
-	Serial.println(i2cFails);
-
+	
 	if (sentAMidiBuffer) {											//if we sent a midi buffer
 		for (byte i = 0; i < 7; i++) {								//for every channel entry in buffer
 			midiTracksBuffer16x8[i] = 0;							// clear buffer
 		}
-		Serial.println("erased midibuffer");
+		//Serial.println("erased midibuffer");
 		sentAMidiBuffer = false;									//set flag back to normal buffers.
 	}
 }

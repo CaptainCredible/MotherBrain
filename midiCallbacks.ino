@@ -108,14 +108,38 @@ void handleLPCC(byte channel, byte CC, byte val) {
 				updatePage(pageMode);
 			}			
 			break;
+
+		case 2:
+			if (SHIFT) { //SET no of pages to 1
+				seqLength = 8;
+				currentStep = currentStep%seqLength;
+			}
+			break;
+
+		case 3:
+			if (SHIFT) { //SET no of pages to 2
+				seqLength = 16;
+				currentStep = currentStep%seqLength;
+			}
+			break;
+
 		case 4: //this is the follow on off button
+			if (SHIFT) { //SET no of pages to 3
+				seqLength = 24;
+				currentStep = currentStep%seqLength;
+			} else {
 			follow = !follow;
 			launchPad.sendControlChange(107, 32 * follow, 1);
 			//digitalWrite(ledBpin, follow);
+			}
 			break;
 
 		case 5:
-			
+			if (SHIFT) { //SET no of pages to 4
+				seqLength = 32;
+				currentStep = currentStep%seqLength;
+			}
+			else {
 			if (pageSelect== 0){				//if we are already at page 0
 				pageSelect = numberOfPages-1;	//go back to last page
 			}
@@ -123,8 +147,9 @@ void handleLPCC(byte channel, byte CC, byte val) {
 				pageSelect--;					//else decrement page by one
 			}
 			updatePage(pageMode);
-			Serial.print("pageSelect = ");
-			Serial.println(pageSelect);
+			//Serial.print("pageSelect = ");
+			//Serial.println(pageSelect);
+			}
 			break;
 
 		case 6:

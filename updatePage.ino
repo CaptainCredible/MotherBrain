@@ -121,8 +121,8 @@ void handleTopLeds() {
 
 void handleWhiteLeds() {  //these leds show what page we are on (up to four)
 	byte pageThatSeqIsOn = currentStep >> 3;
-	digitalWrite(ledApin, bitRead(pageThatSeqIsOn, 0));
-	digitalWrite(ledBpin, bitRead(pageThatSeqIsOn, 1));
+	digitalWrite(ledBpin, bitRead(pageThatSeqIsOn, 0));
+	digitalWrite(ledApin, bitRead(pageThatSeqIsOn, 1));
 }
 
 #define seqLedColour 3
