@@ -1,12 +1,20 @@
+int oldModuloMillis = 999;
 void handleClock() {
 	if (runClock) {
-		if (millis() > clockTimer + stepDuration) {
-			clockTimer = millis();
+		unsigned long now = millis();
+		if (now >= clockTimer + stepDuration) {
+			int diff = now - (clockTimer + stepDuration); // find out if we overshot so we can avoid drifting and instead have just a spot of jitter
+			if (diff > 5) {									//avoid adjusting for diff when there are other delays causing problems
+				diff = 0;
+			}
+			clockTimer = now - diff;					  //Set clocktimer to what it should have been
 			lastStep = currentStep;
 			currentStep++;
 			currentStep = currentStep % seqLength;
 			handleStep();
 			updatePage(pageMode);
+			Serial.print("diff = ");
+			Serial.println(diff);
 		}
 	}
 }
@@ -20,7 +28,7 @@ void handleStep() {
 		//	}
 	}
 	tracksBuffer16x8[8] = currentStep; //slot number eight is where we send the current step number
-	Serial.println(tracksBuffer16x8[8]);
+	//Serial.println(tracksBuffer16x8[8]);
 	sendTracksBuffer();
 }
 

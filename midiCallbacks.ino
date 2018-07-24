@@ -48,8 +48,8 @@ void handleLPNoteOn(byte channel, byte pitch, byte velocity) {
 		else { //if page mode isnt 0, we are not in overview mode and note
 			byte trackSelector = pageMode - 1; // this is the track we are writing to basically
 			int matrixCursor = LPtoMatrix[pitch % 16] + (currentPage * 8) + trackSelector *matrixTrackOffset; //this is what matrix entry we are editing
-			Serial.print("isPoly = ");
-			Serial.println(isPoly[trackSelector]);
+			//Serial.print("isPoly = ");
+			//Serial.println(isPoly[trackSelector]);
 			if (isPoly[trackSelector]) {							//if this is a polyphonic 8 output track
 				if (bitRead(seqMatrix[matrixCursor], rowPressed)) {				//if this bit is set
 					bitClear(seqMatrix[matrixCursor], rowPressed);				//clear it
@@ -60,14 +60,14 @@ void handleLPNoteOn(byte channel, byte pitch, byte velocity) {
 					LPSetLedRaw(pitch, trackColours[trackSelector]);
 					//LPSetLed(pitch, trackColours[rowPressed]);		//turn that LED off
 				}
-				Serial.print("that entry is now = ");
-				Serial.print(seqMatrix[matrixCursor]);
-				Serial.print(" in binary = ");
-				Serial.println(seqMatrix[matrixCursor], BIN);
+				////Serial.print("that entry is now = ");
+				////Serial.print(seqMatrix[matrixCursor]);
+				////Serial.print(" in binary = ");
+				////Serial.println(seqMatrix[matrixCursor], BIN);
 			}
 			else {											//if this is a mono 127 output track
-				Serial.print("rowPressed = ");
-				Serial.println(rowPressed);
+				//Serial.print("rowPressed = ");
+				//Serial.println(rowPressed);
 				if (seqMatrix[matrixCursor] == rowPressed+1) {
 					seqMatrix[matrixCursor] = 0;
 				}
@@ -95,7 +95,7 @@ void handleLPNoteOff(byte channel, byte pitch, byte velocity) {
 void handleLPCC(byte channel, byte CC, byte val) {
 	byte buttWasPressed = CC - 103;
 	if (val > 0) {
-		//Serial.println(buttWasPressed);
+		////Serial.println(buttWasPressed);
 		switch (buttWasPressed)
 		{
 		case 1:
@@ -147,8 +147,8 @@ void handleLPCC(byte channel, byte CC, byte val) {
 				pageSelect--;					//else decrement page by one
 			}
 			updatePage(pageMode);
-			//Serial.print("pageSelect = ");
-			//Serial.println(pageSelect);
+			////Serial.print("pageSelect = ");
+			////Serial.println(pageSelect);
 			}
 			break;
 
@@ -158,8 +158,8 @@ void handleLPCC(byte channel, byte CC, byte val) {
 				pageSelect = 0;
 			}
 			updatePage(pageMode);
-			Serial.print("pageSelect = ");
-			Serial.println(pageSelect);
+			//Serial.print("pageSelect = ");
+			//Serial.println(pageSelect);
 			break;
 
 		case 7:
@@ -180,8 +180,8 @@ void handleLPCC(byte channel, byte CC, byte val) {
 			break;
 		default:
 			trackToSend = buttWasPressed - 1;
-			//Serial.print("trackToSend = ");
-			//Serial.println(trackToSend);
+			////Serial.print("trackToSend = ");
+			////Serial.println(trackToSend);
 			break;
 		}
 	}

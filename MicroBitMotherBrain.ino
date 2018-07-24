@@ -143,7 +143,7 @@ byte vertButts[8] = { 8,24,40,56,72,88,104,120 };
 
 
 unsigned long clockTimer = 0;
-int stepDuration = 800;
+int stepDuration = 125;
 int lastStep = 200;
 int currentStep = -1;
 bool isSending = false;
@@ -203,7 +203,7 @@ void setup()
 	for (int i = 0; i < 8; i++) {
 		launchPad.sendNoteOn(vertButts[i], trackColours[i], 1);
 		delay(100);
-		//Serial.println(i);
+		////Serial.println(i);
 	}
 	//launchPad.sendNoteOff(127, 127, 10);
 	updatePage(0);
@@ -236,7 +236,7 @@ void debugLoop() {
 	sendTracksBuffer();
 	//send32BitInt();
 	//send64BitInt();
-	Serial.println("Alive");
+	//Serial.println("Alive");
 	delay(100);
 	launchPad.sendNoteOn(1, 0, 1);
 	checkTimeOut(); //reset interruptPin and isSending if the microbit missed the message
@@ -269,12 +269,23 @@ void handleKnobsAndButtons() {
 	buttX = !digitalRead(buttXpin);
 	SHIFT = buttX;
 	//stepDuration = ((2048+minStepDuration) - (knobA << 1));
-	if (SHIFT) {
-		stepDuration = ((2048 + minStepDuration) - (knobA << 1));
+	if (buttB) {
+		int BPM = 10 +(knobB >> 2);
+		int beatLength = 60000 / BPM;
+		stepDuration = beatLength >> 3;
+		Serial.print("BPM = ");
+		Serial.println(BPM);
+		Serial.print("beatLength = ");
+		Serial.println(beatLength);
+		Serial.print("Stepduration = ");
+		Serial.println(stepDuration);
+		Serial.println();
+		Serial.println();
+
 	}
 	
-	//Serial.print("stepDuration ");
-	//Serial.println(stepDuration);
-//	Serial.println(buttX);
+	////Serial.print("stepDuration ");
+	////Serial.println(stepDuration);
+//	//Serial.println(buttX);
 }
 

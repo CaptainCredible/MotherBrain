@@ -36,8 +36,8 @@ digitalWrite(interruptPin, LOW); //start by telling microbit to request track
 i2cTimer = micros();
 isSending = true;
 timeOutStamp = millis();
-//Serial.print("sent sendTracksBuffer interrupt and currentStep is ");
-//Serial.println(currentStep);
+////Serial.print("sent sendTracksBuffer interrupt and currentStep is ");
+////Serial.println(currentStep);
 //delay(1); //change so there is a timer polled and things can be done in background!
 }
 
@@ -70,19 +70,19 @@ void sendUsbMidiPackage() {
 
 void debugRequestEvent() {
 	i2cTimer = micros() - i2cTimer;
-	Serial.print("transmission took ");
-	Serial.print(i2cTimer);
-	Serial.println(" microseconds!");
+	//Serial.print("transmission took ");
+	//Serial.print(i2cTimer);
+	//Serial.println(" microseconds!");
 	isSending = false;
 	digitalWrite(interruptPin, HIGH);
 }
 
 void measureI2CSuccessRate() {
-	Serial.print("i2c OK! ");
+	//Serial.print("i2c OK! ");
 	successfullI2cs++;
-	Serial.print(successfullI2cs);
-	Serial.print("   fails ");
-	Serial.println(i2cFails);
+	//Serial.print(successfullI2cs);
+	//Serial.print("   fails ");
+	//Serial.println(i2cFails);
 
 }
 
@@ -101,7 +101,7 @@ void requestEvent() {
 		for (byte i = 0; i < 7; i++) {								//for every channel entry in buffer
 			midiTracksBuffer16x8[i] = 0;							// clear buffer
 		}
-		//Serial.println("erased midibuffer");
+		////Serial.println("erased midibuffer");
 		sentAMidiBuffer = false;									//set flag back to normal buffers.
 	}
 }
@@ -114,7 +114,7 @@ void checkTimeOut() {
 	if (millis() - timeOutStamp > timeOut && isSending) {
 		digitalWrite(interruptPin, HIGH);
 		isSending = false;
-		Serial.println(" i2c TIMEOUT! ");
+		//Serial.println(" i2c TIMEOUT! ");
 		i2cFails++;
 	}
 }

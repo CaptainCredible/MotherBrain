@@ -88,7 +88,7 @@ void handleOverviewPage() {
 
 byte reset[3] = { 176,0,0 };
 void clearPage() {
-	//Serial.println("CLEARED PAGE");
+	////Serial.println("CLEARED PAGE");
 	Serial1.write(reset, 3);
 	//delay(1000);
 
@@ -139,7 +139,7 @@ void handleCursor() {
 }
 
 void changePageMode(byte newMode) {
-	//Serial.print("changed pagemode to ");
+	////Serial.print("changed pagemode to ");
 
 	if (newMode != pageMode) { //if a track is selected
 		clearVertButts();
