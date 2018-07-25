@@ -1,3 +1,7 @@
+byte oldScrollOffset = 0;
+byte trackScrollOffsets[10] = { 8,8,8,8,8,8,8,64,64,0 };
+
+
 void handleLPNoteOn(byte channel, byte pitch, byte velocity) {
 	switch (pitch)
 	{
@@ -48,15 +52,15 @@ void handleLPNoteOn(byte channel, byte pitch, byte velocity) {
 		else { //if page mode isnt 0, we are not in overview mode and note
 			byte trackSelector = pageMode - 1; // this is the track we are writing to basically
 			int matrixCursor = LPtoMatrix[pitch % 16] + (currentPage * 8) + trackSelector *matrixTrackOffset; //this is what matrix entry we are editing
-			//Serial.print("isPoly = ");
-			//Serial.println(isPoly[trackSelector]);
-			if (isPoly[trackSelector]) {							//if this is a polyphonic 8 output track
-				if (bitRead(seqMatrix[matrixCursor], rowPressed)) {				//if this bit is set
-					bitClear(seqMatrix[matrixCursor], rowPressed);				//clear it
+			Serial.print("isPoly = ");
+			Serial.println(isPoly[trackSelector]);
+			if (isPoly[trackSelector]) {								//if this is a polyphonic 8 output track
+				if (bitRead(seqMatrix[matrixCursor], rowPressed)) {		//if this bit is set
+					bitClear(seqMatrix[matrixCursor], rowPressed);		//clear it
 					LPSetLedRaw(pitch, 0);								//turn that LED off
 				}
-				else {												//if that bit isn't set
-					bitSet(seqMatrix[matrixCursor], rowPressed);				//set it
+				else {													//if that bit isn't set
+					bitSet(seqMatrix[matrixCursor], rowPressed);		//set it
 					LPSetLedRaw(pitch, trackColours[trackSelector]);
 					//LPSetLed(pitch, trackColours[rowPressed]);		//turn that LED off
 				}
@@ -65,16 +69,40 @@ void handleLPNoteOn(byte channel, byte pitch, byte velocity) {
 				////Serial.print(" in binary = ");
 				////Serial.println(seqMatrix[matrixCursor], BIN);
 			}
-			else {											//if this is a mono 127 output track
-				//Serial.print("rowPressed = ");
-				//Serial.println(rowPressed);
-				if (seqMatrix[matrixCursor] == rowPressed+1) {
-					seqMatrix[matrixCursor] = 0;
+			else {														//if this is a mono 127 output track
+				Serial.print("rowPressed = ");
+				Serial.println(rowPressed);
+				
+				unsigned int storedVal = seqMatrix[matrixCursor];
+				if (!altMidiTrack) {
+					storedVal = storedVal << 8;
+				}
+				storedVal = storedVal >> 8;							//bad way to bitmask the most significant bits
+					
+				
+				byte valToWrite = 0;
+
+				if (storedVal == rowPressed+1) {
+					valToWrite = 0;
 				}
 				else {
-					seqMatrix[matrixCursor] = rowPressed+1;
+					valToWrite = rowPressed + 1;
+					//seqMatrix[matrixCursor] = rowPressed+1;
 				}
-				
+
+				if (!altMidiTrack) {
+					seqMatrix[matrixCursor] = seqMatrix[matrixCursor] & 0b1111111100000000;  //clear LSB
+					seqMatrix[matrixCursor] = seqMatrix[matrixCursor] | valToWrite;			// put our valToWrite in LSB
+				} else {
+					seqMatrix[matrixCursor] = seqMatrix[matrixCursor] & 0b0000000011111111;  //clear MSB
+					seqMatrix[matrixCursor] = seqMatrix[matrixCursor] | valToWrite<<8;		//put our valtowrite in MSB
+					Serial.print("wrote to alt track");
+					Serial.println(seqMatrix[matrixCursor >> 8]);
+				}
+
+
+
+
 				forceUpdate = true;
 				updatePage(pageMode);
 			}
@@ -163,26 +191,46 @@ void handleLPCC(byte channel, byte CC, byte val) {
 			break;
 
 		case 7:
-			scrollOffset++;
-			if (scrollOffset > 8) {
-				scrollOffset = 8;   //limit scrollOffset to 0-7
-			}
+			oldScrollOffset = scrollOffset;
+			scrollOffset--;
+			limitScrollOffset();
+			trackScrollOffsets[pageMode] = scrollOffset; // remember settings per track to be recalled when pagemode changes
 			forceUpdate = true;
 			updatePage(currentPage);
+			Serial.print("scrollOffset = ");
+			Serial.println(scrollOffset);
 			break;
 		case 8:
-			scrollOffset--;
-			if (scrollOffset > 8) {
-				scrollOffset = 0;    //if we subtracted one from scrollOffset and it is greater than seven, it means its rolled over and we want to set it back to 0;
-			}
+			oldScrollOffset = scrollOffset;
+			scrollOffset++;
+			limitScrollOffset();
+			trackScrollOffsets[pageMode] = scrollOffset; // remember settings per track to be recalled when pagemode changesfg
 			forceUpdate = true;
 			updatePage(currentPage);
+			Serial.print("scrollOffset = ");
+			Serial.println(scrollOffset);
 			break;
 		default:
 			trackToSend = buttWasPressed - 1;
 			////Serial.print("trackToSend = ");
 			////Serial.println(trackToSend);
 			break;
+		}
+	}
+}
+
+void limitScrollOffset() {
+	Serial.print("ispoly = ");
+	Serial.println(isPoly[pageMode-1]);
+	if (isPoly[pageMode-1]) {
+		if (scrollOffset > 8) {
+			
+			scrollOffset = oldScrollOffset;   //limit scrollOffset to 0-7
+		}
+	}
+	else {
+		if (scrollOffset > 127) {
+			scrollOffset = oldScrollOffset;   //limit scrollOffset to 0-7
 		}
 	}
 }

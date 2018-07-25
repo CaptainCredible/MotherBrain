@@ -42,8 +42,10 @@ void updatePage(byte mode) { // forceUpdate is a boolean to force a page update 
 }
 
 void handleTrackPage(byte trackPageToHandle) {
+	
 	byte trackPageWeAreHandling = trackPageToHandle - 1; //move 1-8 to 0-7
 	if (isPoly[trackPageWeAreHandling]) {
+		Serial.println("drawing poly track");
 		for (byte col = 0; col < 8; col++) {             
 			int seqMatrixCursor = col + (currentPage * 8) + (trackPageWeAreHandling * matrixTrackOffset);
 			int val = seqMatrix[seqMatrixCursor];
@@ -57,12 +59,36 @@ void handleTrackPage(byte trackPageToHandle) {
 		}
 	}
 	else {//handle the non poly 127 note tracks
-		for (byte col = 0; col < 8; col++) {
-			int seqMatrixCursor = col + (currentPage * 8) + (trackPageWeAreHandling * matrixTrackOffset);
-			int val = seqMatrix[seqMatrixCursor];
-			if (val > 0) {
+		Serial.println("drawing MIDI track");
+		for (byte col = 0; col < 8; col++) {																				// use col to handle what column we are drawing on left to right
+			int seqMatrixCursor = col + (currentPage * 8) + (trackPageWeAreHandling * matrixTrackOffset);					// find right seqmatrix slot to read from
+			unsigned int rawVal = seqMatrix[seqMatrixCursor];																// 
+			if (!altMidiTrack) {
+
+				//rawVal = 0b0000000011111111 && rawVal;  //use only last 8 bits of int
+				rawVal = rawVal << 8;
+			}
+			
+				rawVal = rawVal >> 8;					//use first 8 bits
+			
+				if (col == 0) {
+					Serial.print("rawVal");
+					Serial.println(rawVal);
+				}
+
+			byte val = rawVal - scrollOffset;
+
+			if(col == 0){
+			Serial.print("val = ");
+			Serial.println(val);
+			}
+			if (val > 0 & val < 9) {
 				int LPmatrixCursor = col + ((val - 1) * 8);
-				LPSetLed(LPmatrixCursor, trackColours[trackPageWeAreHandling]);
+				byte colWeWantToUse = trackColours[trackPageWeAreHandling];
+				if (altMidiTrack) {
+					colWeWantToUse = 3;
+				}
+				LPSetLed(LPmatrixCursor, colWeWantToUse);
 			}
 			
 		}
@@ -140,15 +166,22 @@ void handleCursor() {
 
 void changePageMode(byte newMode) {
 	////Serial.print("changed pagemode to ");
-
+	scrollOffset = trackScrollOffsets[newMode];
+	
 	if (newMode != pageMode) { //if a track is selected
 		clearVertButts();
 		pageMode = newMode;
+		altMidiTrack = SHIFT;
+		Serial.print("isPoly = ");
+		Serial.println(isPoly[pageMode-1]);
 	}
 	else {						//if the same page is selected again
 		pageMode = 0;			//go to overview
+		altMidiTrack = false;
 	}
-
+	Serial.print("pageMode = ");
+	Serial.println(pageMode);
+	forceUpdate = true;
 	updatePage(pageMode);
 }
 

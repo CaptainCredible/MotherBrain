@@ -41,10 +41,10 @@ struct MySettings : public midi::DefaultSettings                                
 MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial1, launchPad, MySettings);
 
 byte scrollOffset = 0;
+bool altMidiTrack = false;
 
 
-
-int seqMatrix[256] = {
+unsigned int seqMatrix[256] = {
 0,0,0,1,0,0,0,0,	0,1,1,1,1,0,0,0,	0,1,1,1,1,1,0,0,	0,1,0,0,0,1,0,0,
 0,0,0,1,0,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,	0,1,0,0,0,1,0,0,
 0,0,0,1,0,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,	0,1,0,0,0,1,0,0,
@@ -101,7 +101,7 @@ bool buttX = false;
 
 byte tracksBuffer[8] = { 201,202,203,204,205,206,207,208 };
 byte trackColours[8] = { 79,95,127,110,126,109,125,124 };
-bool isPoly[8] = { true,true,true,true,true,true ,false ,false }; // this equates to midi channel 1,2,3,4,5,6 as poly and 7+8 ,9+10, as mono channels sharing same int in the buffer
+bool isPoly[8] = { true,true,true,true,true,true ,true ,false }; // this equates to midi channel 1,2,3,4,5,6,7 as poly and 8+9 as mono channels sharing same int in the buffer
 
 byte LPMAP[64]{
 	  0,  1,  2,  3,  4,  5,  6,  7,
