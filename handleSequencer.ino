@@ -1,4 +1,9 @@
-int oldModuloMillis = 999;
+void handleTimeSig() {
+	if (currentStep % 8 >= 8 - timeSig) {
+		currentStep += timeSig;
+	}
+}
+
 void handleClock() {
 	if (runClock) {
 		unsigned long now = millis();
@@ -10,6 +15,7 @@ void handleClock() {
 			clockTimer = now - diff;					  //Set clocktimer to what it should have been
 			lastStep = currentStep;
 			currentStep++;
+			handleTimeSig();
 			currentStep = currentStep % seqLength;
 			handleStep();
 			updatePage(pageMode);

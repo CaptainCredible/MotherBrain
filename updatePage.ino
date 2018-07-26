@@ -135,14 +135,17 @@ void displayPagenumber() {
 
 void handleTopLeds() {
 	handleWhiteLeds();
+	handleFollowIndicator();
 	handleCursor();
 	byte colChanger = 0;
+	/*
 	if (follow) {
 		if (currentStep%8 == 3){
 			colChanger = 1;
 		}
 		launchPad.sendControlChange(107, 32-colChanger, 1);
 	}
+	*/
 }
 
 void handleWhiteLeds() {  //these leds show what page we are on (up to four)
@@ -151,12 +154,12 @@ void handleWhiteLeds() {  //these leds show what page we are on (up to four)
 	digitalWrite(ledApin, bitRead(pageThatSeqIsOn, 1));
 }
 
-#define seqLedColour 3
+
 void handleCursor() {
-	byte colChanger = 0;
+	//byte colChanger = 0;
 	if (currentPage == currentStep >> 3) {
-		launchPad.sendControlChange(topButts[lastStep % 8], 0, 1);
-		launchPad.sendControlChange(topButts[currentStep % 8], seqLedColour - colChanger, 1);
+		launchPad.sendControlChange(topButts[lastStep % 8], followCol * follow, 1);
+		launchPad.sendControlChange(topButts[currentStep % 8], seqLedColour, 1);
 	}
 	else if (currentPage == lastStep >> 3) {
 		launchPad.sendControlChange(topButts[lastStep % 8], 0, 1);

@@ -17,11 +17,11 @@
   <ItemGroup>
     <None Include="MicroBitMotherBrain.ino" />
     <None Include="handleSequencer.ino" />
-    <None Include="midiCallbacks.ino" />
     <None Include="debug.ino" />
     <None Include="updatePage.ino" />
     <None Include="comms.ino" />
     <None Include="HandleUSBMidi.ino" />
+    <None Include="inputHandling.ino" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.MicroBitMotherBrain.vsarduino.h">

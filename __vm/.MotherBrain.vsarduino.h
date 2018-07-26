@@ -82,7 +82,7 @@ typedef void *__builtin_va_list;
 #include "comms.ino"
 #include "debug.ino"
 #include "handleSequencer.ino"
-#include "midiCallbacks.ino"
+#include "inputHandling.ino"
 #include "updatePage.ino"
 #endif
 #endif

@@ -9,6 +9,12 @@
 #define interruptPin 16
 #define interruptPin2 10
 
+#define seqLedColour 3
+#define followCol 32
+
+
+unsigned long tapTempoTimer = 0;
+bool forceStep = false;
 bool SHIFT = false;
 bool internalClockSelect = false;
 bool midiClockRunning = false;
@@ -17,6 +23,8 @@ bool midiClockRunning = false;
 const byte NOTEON = 0x09;
 const byte NOTEOFF = 0x08;
 const byte MCLOCKTICK = 0x03;
+byte timeSig = 0; // 0 = 4/4, 1 = 7/8, 2 = 3/3, 3 = 5/8
+
 
 const byte pageDisplayCol = 16;
 
@@ -258,34 +266,5 @@ void loop() {
 }
 
 
-#define minStepDuration 33
 
-void handleKnobsAndButtons() {
-	knobA = analogRead(A1);
-	knobB = analogRead(A0);
-	buttA = !digitalRead(buttApin);
-	buttB = !digitalRead(buttBpin);
-	buttC = !digitalRead(buttCpin);
-	buttX = !digitalRead(buttXpin);
-	SHIFT = buttX;
-	//stepDuration = ((2048+minStepDuration) - (knobA << 1));
-	if (buttB) {
-		int BPM = 10 +(knobB >> 2);
-		int beatLength = 60000 / BPM;
-		stepDuration = beatLength >> 3;
-		Serial.print("BPM = ");
-		Serial.println(BPM);
-		Serial.print("beatLength = ");
-		Serial.println(beatLength);
-		Serial.print("Stepduration = ");
-		Serial.println(stepDuration);
-		Serial.println();
-		Serial.println();
-
-	}
-	
-	////Serial.print("stepDuration ");
-	////Serial.println(stepDuration);
-//	//Serial.println(buttX);
-}
 

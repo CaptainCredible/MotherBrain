@@ -94,7 +94,7 @@
     <None Include="MicroBitMotherBrain.ino">
       <FileType>CppCode</FileType>
     </None>
-    <None Include="midiCallbacks.ino">
+    <None Include="inputHandling.ino">
       <FileType>CppCode</FileType>
     </None>
     <None Include="updatePage.ino">
