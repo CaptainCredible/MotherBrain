@@ -98,10 +98,11 @@ void requestEvent() {
 	digitalWrite(interruptPin, HIGH);
 	
 	if (sentAMidiBuffer) {											//if we sent a midi buffer
-		for (byte i = 0; i < 7; i++) {								//for every channel entry in buffer
+		for (byte i = 0; i < 8; i++) {								//for every channel entry in buffer
 			midiTracksBuffer16x8[i] = 0;							// clear buffer
 		}
-		////Serial.println("erased midibuffer");
+		Serial.println("erased midibuffer");
+		debugInt(midiTracksBuffer16x8[7]);
 		sentAMidiBuffer = false;									//set flag back to normal buffers.
 	}
 }

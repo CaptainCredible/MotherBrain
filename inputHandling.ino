@@ -309,6 +309,7 @@ void handleKnobsAndButtons() {
 		int BPM = 10 + (knobB >> 2);
 		int beatLength = 60000 / BPM;
 		stepDuration = beatLength >> 3;
+		/*
 		Serial.print("BPM = ");
 		Serial.println(BPM);
 		Serial.print("beatLength = ");
@@ -317,7 +318,7 @@ void handleKnobsAndButtons() {
 		Serial.println(stepDuration);
 		Serial.println();
 		Serial.println();
-
+		*/
 	}
 
 	if (buttC && !oldButtC) {
@@ -332,6 +333,10 @@ void handleKnobsAndButtons() {
 			lastStep = currentStep;
 			if (SHIFT) {
 				currentStep--;
+				
+				if (currentStep < 0) {
+					currentStep = seqLength-1;
+				}
 			}
 			else {
 				currentStep++;
