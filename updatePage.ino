@@ -65,18 +65,18 @@ void handleTrackPage(byte trackPageToHandle) {
 			unsigned int rawVal = seqMatrix[seqMatrixCursor];																// 
 			if (!altMidiTrack) {
 
-				//rawVal = 0b0000000011111111 && rawVal;  //use only last 8 bits of int
-				rawVal = rawVal << 8;
+				//rawVal = 0b0000000011111111 & rawVal;  //use only last 8 bits of int
+				rawVal = rawVal << 8;					//hacky way of clearing first 8 bits works because we are bitshifting back in next operation
 			}
 			
 				rawVal = rawVal >> 8;					//use first 8 bits
 			
-				if (col == 0) {
+				if (col == 0) {							//debug
 					Serial.print("rawVal");
 					Serial.println(rawVal);
 				}
-
-			byte val = rawVal - scrollOffset;
+				byte invertedVal = 127 - rawVal;			//invert to make the grid the right way round
+			byte val = invertedVal - scrollOffset;			// translate to our viewing space by acounting for how far we have scrolled
 
 			if(col == 0){
 			Serial.print("val = ");

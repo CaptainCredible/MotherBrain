@@ -100,8 +100,10 @@ void handleLPNoteOn(byte channel, byte pitch, byte velocity) {
 				}
 				storedVal = storedVal >> 8;							//bad way to bitmask the most significant bits
 
+				storedVal = 127 - storedVal;							//invert back to to normal.
 
 				byte valToWrite = 0;
+
 
 				if (storedVal == rowPressed + 1) {
 					valToWrite = 0;
@@ -110,6 +112,8 @@ void handleLPNoteOn(byte channel, byte pitch, byte velocity) {
 					valToWrite = rowPressed + 1;
 					//seqMatrix[matrixCursor] = rowPressed+1;
 				}
+
+				valToWrite = 127 - valToWrite;						//flip to make grid right way round
 
 				if (!altMidiTrack) {
 					seqMatrix[matrixCursor] = seqMatrix[matrixCursor] & 0b1111111100000000;  //clear LSB

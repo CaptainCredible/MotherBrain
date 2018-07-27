@@ -38,6 +38,7 @@ byte trackToSend = 0;
 
 byte dataPacket128[16] = { 221,222,223,224,225,226,227,228,229,230,231,232,233,234,235,236 };
 unsigned int tracksBuffer16x8[9] = { 65001,65002,65003,65004,65005,65006,65007,65008 }; //last one used for currentStep, so receivers need to be able to determine that we are not setting step number!
+//unsigned int tempMidiTracksBuffer16x8[9] = 
 unsigned int midiTracksBuffer16x8[9] = { 65001,65002,65003,65004,65005,65006,65007,65008 }; //last one used for currentStep, so receivers need to be able to determine that we are not setting step number!
 
 struct MySettings : public midi::DefaultSettings                                 //code to change if running status is disabled
@@ -109,7 +110,7 @@ bool buttX = false;
 
 byte tracksBuffer[8] = { 201,202,203,204,205,206,207,208 };
 byte trackColours[8] = { 79,95,127,110,126,109,125,124 };
-bool isPoly[8] = { true,true,true,true,true,true ,true ,false }; // this equates to midi channel 1,2,3,4,5,6,7 as poly and 8+9 as mono channels sharing same int in the buffer
+bool isPoly[9] = { true,true,true,true,true,true ,true ,false, false }; // this equates to midi channel 1,2,3,4,5,6,7 as poly and 8+9 as mono channels sharing same int in the buffer //the last false is there so USBmidi can look it up as alt channel
 
 byte LPMAP[64]{
 	  0,  1,  2,  3,  4,  5,  6,  7,

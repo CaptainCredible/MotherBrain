@@ -7,9 +7,13 @@ void handleTimeSig() {
 void handleClock() {
 	if (runClock) {
 		unsigned long now = millis();
+		Serial.print("clocktimer = ");
+		Serial.println(clockTimer);
+		Serial.print("        Now = ");
+		Serial.println(now);
 		if (now >= clockTimer + stepDuration) {
 			int diff = now - (clockTimer + stepDuration); // find out if we overshot so we can avoid drifting and instead have just a spot of jitter
-			if (diff > 5) {									//avoid adjusting for diff when there are other delays causing problems
+			if (diff > 5 || diff < 0) {									//avoid adjusting for diff when there are other delays causing problems
 				diff = 0;
 			}
 			clockTimer = now - diff;					  //Set clocktimer to what it should have been
