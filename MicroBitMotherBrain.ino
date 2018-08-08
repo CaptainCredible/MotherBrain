@@ -8,6 +8,10 @@
 #define LEDPIN 14
 #define interruptPin 16
 #define interruptPin2 10
+#define ZamLed 15
+#define followLed 14
+#define followSwitch A2
+#define shiftLed A0
 
 #define seqLedColour 3
 #define followCol 32
@@ -24,7 +28,8 @@ const byte NOTEON = 0x09;
 const byte NOTEOFF = 0x08;
 const byte MCLOCKTICK = 0x03;
 byte timeSig = 0; // 0 = 4/4, 1 = 7/8, 2 = 3/3, 3 = 5/8
-
+byte desiredEndStep = 32;
+byte desiredStartStep = 0;
 
 const byte pageDisplayCol = 16;
 
@@ -35,6 +40,8 @@ int noteToSend = 123;
 bool runClock = false;
 bool trackOrNote = false;
 byte trackToSend = 0;
+
+unsigned long pageNumberClearTimer = 0;
 
 byte dataPacket128[16] = { 221,222,223,224,225,226,227,228,229,230,231,232,233,234,235,236 };
 unsigned int tracksBuffer16x8[9] = { 65001,65002,65003,65004,65005,65006,65007,65008 }; //last one used for currentStep, so receivers need to be able to determine that we are not setting step number!
@@ -63,6 +70,8 @@ unsigned int seqMatrix[256] = {
 0,0,0,1,0,0,0,0,	0,0,1,0,0,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,
 0,0,0,1,0,0,0,0,	0,1,1,1,1,1,1,0,	0,1,1,1,1,1,0,0,	0,0,0,0,0,1,0,0};
 
+byte startStep = 0;
+byte endStep = 32;
 int seqLength = 32; // temporary debug seqlength, needs to be settable by user
 //needs to lock stably, perhaps knob is not best solution
 
@@ -98,7 +107,7 @@ byte currentPage = 0;
 byte pageSelect = 0;
 byte viewPage = 0;
 byte firstStepOfPage = 0;
-bool follow = true;
+bool follow = false;
 
 
 int knobA = 0;
@@ -168,8 +177,12 @@ const byte ledApin = 4;
 const byte ledBpin = 5;
 bool forceUpdate = true;
 
+byte currentPageThatIsPlaying = 0;
+byte previousPageThatWasPlaying = 0;
+
 unsigned long i2cTimer = 0; //for debug
 
+bool topLedWasSet[8] = { false,false,false,false, false,false,false,false, }; //array to keep track of whether anything has writen to a specific led this time around
 
 void setup()
 {
@@ -182,10 +195,15 @@ void setup()
 	pinMode(ledApin, OUTPUT);
 	pinMode(ledBpin, OUTPUT);
 	pinMode(LEDPIN, OUTPUT);
-	pinMode(A0, INPUT);
+	//pinMode(A0, INPUT);
 	pinMode(A1, INPUT);
 	pinMode(interruptPin, OUTPUT);
 	pinMode(interruptPin2, OUTPUT);
+	pinMode(ZamLed, OUTPUT);
+	pinMode(shiftLed, OUTPUT);
+	pinMode(followSwitch, INPUT_PULLUP);
+	pinMode(followLed, OUTPUT);
+
 	Wire.begin(8);                // join i2c bus with address #8
 	launchPad.begin();
 	launchPad.turnThruOff();
@@ -212,7 +230,7 @@ void setup()
 	for (int i = 0; i < 8; i++) {
 		launchPad.sendNoteOn(vertButts[i], trackColours[i], 1);
 		delay(100);
-		////Serial.println(i);
+		//////Serial.println(i);
 	}
 	//launchPad.sendNoteOff(127, 127, 10);
 	updatePage(0);
@@ -245,7 +263,7 @@ void debugLoop() {
 	sendTracksBuffer();
 	//send32BitInt();
 	//send64BitInt();
-	//Serial.println("Alive");
+	////Serial.println("Alive");
 	delay(100);
 	launchPad.sendNoteOn(1, 0, 1);
 	checkTimeOut(); //reset interruptPin and isSending if the microbit missed the message
@@ -257,6 +275,7 @@ void loop() {
 #ifdef DEBUG
 	debugLoop();
 #else
+	handlePageNumDisplayTimeouts();
 	handleClock();
 	launchPad.read();
 	checkTimeOut(); //reset interruptPin and isSending if the microbit missed the message
@@ -266,6 +285,17 @@ void loop() {
 	
 }
 
+bool numIsDisplayed = false;
+
+void handlePageNumDisplayTimeouts() {
+	if (numIsDisplayed) {
+		if (millis() > pageNumberClearTimer) {
+			numIsDisplayed = false;
+			forceUpdate = true;
+			updatePage(currentPage);
+		}
+	}
+}
 
 
 
