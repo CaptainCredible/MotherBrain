@@ -275,6 +275,7 @@ void handleLPCC(byte channel, byte CC, byte val) {
 		case 5:
 			if (SHIFT) { //SET timesig to 5/8
 				timeSig = 3;
+				handleTimeSigDisplay();
 			}
 			else {
 				if (pageSelect == 0) {				//if we are already at page 0
@@ -292,6 +293,7 @@ void handleLPCC(byte channel, byte CC, byte val) {
 		case 6:
 			if (SHIFT) {
 				timeSig = 2; //set timesig to 3/3
+				handleTimeSigDisplay();
 			}
 			else {
 				pageSelect++;
@@ -307,6 +309,7 @@ void handleLPCC(byte channel, byte CC, byte val) {
 		case 7:
 			if (SHIFT) {
 				timeSig = 1; //set timeSig to 7/8
+				handleTimeSigDisplay();
 			}
 			else {
 				oldScrollOffset = scrollOffset;
@@ -322,6 +325,7 @@ void handleLPCC(byte channel, byte CC, byte val) {
 		case 8:
 			if (SHIFT) {
 				timeSig = 0; //set timeSig to 4/4;
+				handleTimeSigDisplay();
 			}
 			else {
 				oldScrollOffset = scrollOffset;

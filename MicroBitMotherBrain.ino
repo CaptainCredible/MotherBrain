@@ -28,6 +28,7 @@ const byte NOTEON = 0x09;
 const byte NOTEOFF = 0x08;
 const byte MCLOCKTICK = 0x03;
 byte timeSig = 0; // 0 = 4/4, 1 = 7/8, 2 = 3/3, 3 = 5/8
+byte oldTimeSig = -1;
 byte desiredEndStep = 32;
 byte desiredStartStep = 0;
 

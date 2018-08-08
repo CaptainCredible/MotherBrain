@@ -200,6 +200,7 @@ void displayPageNumber() {
 		handleCurrentPageDisplay();
 		handleCurrentPagePlayingDisplay();
 		//handleFollowIndicator();
+		handleTimeSigDisplay();
 		handleCursor();
 		byte colChanger = 0;
 		/*
@@ -241,6 +242,18 @@ void displayPageNumber() {
 		topLedWasSet[currentPage] = true;
 	}
 
+#define timeSigDisplayCol 99
+	void handleTimeSigDisplay() {
+		if (oldTimeSig != timeSig) {
+			launchPad.sendControlChange(topButts[7 - oldTimeSig], 0, 1);
+			oldTimeSig = timeSig;
+		}
+		if (true){//(timeSig > 0) {
+			
+			
+			launchPad.sendControlChange(topButts[7 - timeSig],timeSigDisplayCol, 1);
+		}
+	}
 
 	void handleCursor() {
 		//byte colChanger = 0;
