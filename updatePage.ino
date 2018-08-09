@@ -269,6 +269,8 @@ void displayPageNumber() {
 
 	}
 
+	
+
 	void changePageMode(byte newMode) {
 		//Serial.print("changed pagemode to ");
 		scrollOffset = trackScrollOffsets[newMode + altMidiTrack];

@@ -69,6 +69,15 @@ void debugInt(unsigned int valToPrint) {
 	//Serial.println();
 }
 
+void hijackUSBMidiTrackBuffer(byte val, byte slot) {
+	if (!waitingForTimeOut) {
+		clearMidiTracksBuffer();
+		bitSet(midiTracksBuffer16x8[slot], val);				//set corresponding bit in corresponding int in the buffer to be sent
+		sendUsbMidiPackage();
+
+	}
+}
+
 void HandleUsbNoteOn(byte note, byte velocity, byte channel) {
 	//Serial.print("channel = ");
 	//Serial.println(channel);

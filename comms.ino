@@ -98,16 +98,17 @@ void requestEvent() {
 	digitalWrite(interruptPin, HIGH);
 	
 	if (sentAMidiBuffer) {											//if we sent a midi buffer
-		for (byte i = 0; i < 8; i++) {								//for every channel entry in buffer
-			midiTracksBuffer16x8[i] = 0;							// clear buffer
-		}
-		//Serial.println("erased midibuffer");
-		debugInt(midiTracksBuffer16x8[7]);
-		sentAMidiBuffer = false;									//set flag back to normal buffers.
+		clearMidiTracksBuffer();								//also sets sent a midi buffer to false
 	}
 }
 
-
+void clearMidiTracksBuffer() {									//also sets sentAMidiBuffer to false
+	for (byte i = 0; i < 8; i++) {								//for every channel entry in buffer
+		midiTracksBuffer16x8[i] = 0;							// clear buffer
+	}
+	//debugInt(midiTracksBuffer16x8[7]);
+	sentAMidiBuffer = false;									//set flag back to normal buffers.
+}
 
 
 #define timeOut  10
