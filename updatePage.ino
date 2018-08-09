@@ -249,9 +249,8 @@ void displayPageNumber() {
 			oldTimeSig = timeSig;
 		}
 		if (true){//(timeSig > 0) {
-			
-			
 			launchPad.sendControlChange(topButts[7 - timeSig],timeSigDisplayCol, 1);
+			topLedWasSet[7 - timeSig] = true;
 		}
 	}
 
@@ -261,8 +260,7 @@ void displayPageNumber() {
 			if (!topLedWasSet[lastStep % 8]) {
 				launchPad.sendControlChange(topButts[lastStep % 8], 0, 1);
 			}
-
-			launchPad.sendControlChange(topButts[currentStep % 8], seqLedColour, 1);
+			launchPad.sendControlChange(topButts[currentStep % 8], seqLedColour, 1);  //sets seqstepled regardless of whether they are on or not
 		}
 		else if (currentPage == lastStep >> 3) {
 			launchPad.sendControlChange(topButts[lastStep % 8], 0, 1);
