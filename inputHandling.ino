@@ -315,7 +315,7 @@ void handleLPCC(byte channel, byte CC, byte val) {
 				oldScrollOffset = scrollOffset;
 				scrollOffset--;
 				limitScrollOffset();
-				trackScrollOffsets[pageMode] = scrollOffset; // remember settings per track to be recalled when pagemode changes
+				trackScrollOffsets[pageMode + altMidiTrack] = scrollOffset; // remember settings per track to be recalled when pagemode changes
 				forceUpdate = true;
 				updatePage(currentPage);
 				Serial.print("scrollOffset = ");
@@ -331,7 +331,7 @@ void handleLPCC(byte channel, byte CC, byte val) {
 				oldScrollOffset = scrollOffset;
 				scrollOffset++;
 				limitScrollOffset();
-				trackScrollOffsets[pageMode] = scrollOffset; // remember settings per track to be recalled when pagemode changesfg
+				trackScrollOffsets[pageMode + altMidiTrack] = scrollOffset; // remember settings per track to be recalled when pagemode changesfg
 				forceUpdate = true;
 				updatePage(currentPage);
 				Serial.print("scrollOffset = ");

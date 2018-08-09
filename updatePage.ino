@@ -271,9 +271,9 @@ void displayPageNumber() {
 
 	void changePageMode(byte newMode) {
 		//Serial.print("changed pagemode to ");
-		scrollOffset = trackScrollOffsets[newMode];
+		scrollOffset = trackScrollOffsets[newMode + altMidiTrack];
 		Serial.print("scrollOffset = ");
-		Serial.println(trackScrollOffsets[newMode]);
+		Serial.println(trackScrollOffsets[newMode + altMidiTrack]);
 
 		if (newMode != pageMode) { //if a track is selected
 			clearVertButts();
@@ -287,7 +287,7 @@ void displayPageNumber() {
 		else if (pageMode == 8 && !altMidiTrack) {
 			altMidiTrack = true;
 			digitalWrite(ZamLed, altMidiTrack);
-			scrollOffset = trackScrollOffsets[newMode+1];
+			scrollOffset = trackScrollOffsets[newMode + altMidiTrack];
 			//scrollOffsetSelectorOffset = 1;
 		}
 
