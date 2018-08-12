@@ -123,6 +123,9 @@ void checkTimeOut() {
 
 
 void triggerImmediately(byte track, byte note) {
+	if (track != 0) {
+		hijackUSBMidiTrackBuffer(note, track);
+	}
 	Serial.print("Send track = ");
 	Serial.print(track);
 	Serial.print("note = ");

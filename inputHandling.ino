@@ -394,6 +394,7 @@ void handleKnobsAndButtons() {
 	bool oldButtX = buttX;
 	buttX = !digitalRead(buttXpin);
 	SHIFT = buttX;
+	digitalWrite(shiftLed, SHIFT);
 	//stepDuration = ((2048+minStepDuration) - (knobA << 1));
 
 	if (buttA && !oldButtA) {

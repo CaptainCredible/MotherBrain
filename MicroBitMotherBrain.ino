@@ -228,6 +228,7 @@ void setup()
 		currentStep = 0;
 	}
 	//changePageMode(pageMode);
+	delay(2000);
 	for (int i = 0; i < 8; i++) {
 		launchPad.sendNoteOn(vertButts[i], trackColours[i], 1);
 		delay(100);
