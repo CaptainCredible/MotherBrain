@@ -86,8 +86,10 @@ void measureI2CSuccessRate() {
 
 }
 
-void requestEvent() {
-	if (sentAMidiBuffer) {
+
+
+void requestEvent() {  //this is what happens when the microbit asks for a message
+	if (sentAMidiBuffer) {  //this used to be only midi buffer, but is also used by other functions that need to send immediately
 		I2C_writeAnything(midiTracksBuffer16x8);
 	}
 	else {
@@ -126,8 +128,15 @@ void triggerImmediately(byte track, byte note) {
 	if (track != 0) {
 		hijackUSBMidiTrackBuffer(note, track);
 	}
-	Serial.print("Send track = ");
-	Serial.print(track);
-	Serial.print("note = ");
-	Serial.println(note);
+//	Serial.print("Send track = ");
+//	Serial.print(track);
+//	Serial.print("note = ");
+//	Serial.println(note);
+}
+
+void sendMutes() {
+	if (!waitingForTimeOut) {
+		midiTracksBuffer16x8[9] = isMutedInt;
+		sendUsbMidiPackage();
+	}
 }

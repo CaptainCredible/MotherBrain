@@ -66,14 +66,20 @@ void handleClock() {
 void handleStep() {
 	for (byte track = 0; track < numberOfTracks; track++) {					//repeat for every track 0-15
 		int matrixCursor = currentStep + (track * matrixTrackOffset);			//check current step for notes
-		tracksBuffer16x8[track] = seqMatrix[matrixCursor];											//	sendWire2microBitTrackAndNote(seqMatrix[matrixCursor],track);			//send that note to microbit (ask microbit to request it.
-		//if (seqMatrix[matrixCursor] > 0){						//if there is a note
-			
-		//	}
+		//if (isMuted[track]) {
+		if (bitRead(isMutedInt,track)) {
+			tracksBuffer16x8[track] = 0;
+		}
+		else {
+			tracksBuffer16x8[track] = seqMatrix[matrixCursor];	//added a test to see if its muted				//	sendWire2microBitTrackAndNote(seqMatrix[matrixCursor],track);			//send that note to microbit (ask microbit to request it.
+		}
+		
 	}
 	tracksBuffer16x8[8] = currentStep; //slot number eight is where we send the current step number
-	////Serial.println(tracksBuffer16x8[8]);
-	sendTracksBuffer();
+	tracksBuffer16x8[9] = isMutedInt;  //slot 9 is where the mutes are stored
+	
+									   ////Serial.println(tracksBuffer16x8[8]);
+	
 }
 
 void clearTracksBuffer() {

@@ -16,7 +16,8 @@
 #define seqLedColour 3
 #define followCol 32
 
-
+uint16_t isMutedInt = 0b0000000000000000;
+bool isMuted[8] = { false, false,false, false,false, false,false, false };
 unsigned long tapTempoTimer = 0;
 bool forceStep = false;
 bool SHIFT = false;
@@ -45,9 +46,9 @@ byte trackToSend = 0;
 unsigned long pageNumberClearTimer = 0;
 
 byte dataPacket128[16] = { 221,222,223,224,225,226,227,228,229,230,231,232,233,234,235,236 };
-unsigned int tracksBuffer16x8[9] = { 65001,65002,65003,65004,65005,65006,65007,65008 }; //last one used for currentStep, so receivers need to be able to determine that we are not setting step number!
+unsigned int tracksBuffer16x8[10] = { 65001,65002,65003,65004,65005,65006,65007,65008,65009 }; //tracks 0 - 8 then currentstep then mutes
 //unsigned int tempMidiTracksBuffer16x8[9] = 
-unsigned int midiTracksBuffer16x8[9] = { 65001,65002,65003,65004,65005,65006,65007,65008 }; //last one used for currentStep, so receivers need to be able to determine that we are not setting step number!
+unsigned int midiTracksBuffer16x8[9] = { 65001,65002,65003,65004,65005,65006,65007,65008,65009 }; //last one used for currentStep, so receivers need to be able to determine that we are not setting step number!
 
 struct MySettings : public midi::DefaultSettings                                 //code to change if running status is disabled
 {

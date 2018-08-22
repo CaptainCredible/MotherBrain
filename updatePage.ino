@@ -314,7 +314,8 @@ void displayPageNumber() {
 
 	void setAllVertButts() {
 		for (int i = 0; i < 8; i++) {
-			launchPad.sendNoteOn(vertButts[i], trackColours[i], 1);
+			//launchPad.sendNoteOn(vertButts[i], trackColours[i] * !isMuted[i], 1);
+			launchPad.sendNoteOn(vertButts[i], trackColours[i] * !(bitRead(isMutedInt, i)), 1); //turn on the led unless corresponding bit in usMuted is 1
 			delay(1);
 		}
 	}

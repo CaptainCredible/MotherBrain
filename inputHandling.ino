@@ -13,88 +13,79 @@ void handleFollowIndicator() {
 	}
 }
 
+
+void handlePageButtons(byte buttonToHandle) {
+	if (SHIFT) {
+		if (pageMode == 0) {
+			if (bitRead(isMutedInt, buttonToHandle >> 4)) {
+				bitClear(isMutedInt, buttonToHandle >> 4);
+			}
+			else {
+				bitSet(isMutedInt, buttonToHandle >> 4);
+			} 
+
+			sendMutes();
+
+			
+			//isMuted[buttonToHandle >> 4] = !isMuted[buttonToHandle >> 4];
+	//		Serial.print("muted ");
+	//		Serial.println(buttonToHandle >> 4);
+			setAllVertButts();
+
+		}
+		else {
+			triggerImmediately(pageMode - 1, (buttonToHandle >> 4) + scrollOffset + 1);
+		}
+
+	}
+	else {
+		changePageMode((buttonToHandle >> 4) + 1);
+	}
+
+}
+
 void handleLPNoteOn(byte channel, byte pitch, byte velocity) {
 	switch (pitch)
 	{
 
 
 	case 8: //bob
-		if (SHIFT) {
-			triggerImmediately(pageMode, (pitch >> 4) + scrollOffset + 1);
-		}
-		else {
-			changePageMode((pitch >> 4) + 1);
-		}
+		handlePageButtons(pitch);
 		break;
 
 
 	case 24: //Tim
-		if (SHIFT) {
-			triggerImmediately(pageMode, (pitch >> 4) + scrollOffset + 1);
-		}
-		else {
-			changePageMode((pitch >> 4) + 1);
-		}
+		handlePageButtons(pitch);
 		break;
 
 
 	case 40: //Ted
-		if (SHIFT) {
-			triggerImmediately(pageMode, (pitch >> 4) + scrollOffset + 1);
-		}
-		else {
-			changePageMode((pitch >> 4) + 1);
-		}
+		handlePageButtons(pitch);
 		break;
 
 
 	case 56: //Pat
-		if (SHIFT) {
-			triggerImmediately(pageMode, (pitch >> 4) + scrollOffset + 1);
-		}
-		else {
-			changePageMode((pitch >> 4) + 1);
-		}
+		handlePageButtons(pitch);
 		break;
 
 
 	case 72: //Cat
-		if (SHIFT) {
-			triggerImmediately(pageMode, (pitch >> 4) + scrollOffset + 1);
-		}
-		else {
-			changePageMode((pitch >> 4) + 1);
-		}
+		handlePageButtons(pitch);
 		break;
 
 
 	case 88: //Dad
-		if (SHIFT) {
-			triggerImmediately(pageMode, (pitch >> 4) + scrollOffset + 1);
-		}
-		else {
-			changePageMode((pitch >> 4) + 1);
-		}
+		handlePageButtons(pitch);
 		break;
 
 
 	case 104: //Mum
-		if (SHIFT) {
-			triggerImmediately(pageMode, (pitch >> 4) + scrollOffset + 1);
-		}
-		else {
-			changePageMode((pitch >> 4) + 1);
-		}
+		handlePageButtons(pitch);
 		break;
 
 
 	case 120: //zim
-		if (SHIFT) {
-			triggerImmediately(pageMode, (pitch >> 4) + scrollOffset + 1);
-		}
-		else {
-			changePageMode((pitch >> 4) + 1);
-		}
+		handlePageButtons(pitch);
 		break;
 
 
