@@ -77,7 +77,7 @@ void handleStep() {
 	}
 	tracksBuffer16x8[8] = currentStep; //slot number eight is where we send the current step number
 	tracksBuffer16x8[9] = isMutedInt;  //slot 9 is where the mutes are stored
-	
+	sendTracksBuffer();
 									   ////Serial.println(tracksBuffer16x8[8]);
 	
 }
