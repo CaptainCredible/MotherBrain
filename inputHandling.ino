@@ -23,7 +23,7 @@ void handlePageButtons(byte buttonToHandle) {
 			else {
 				bitSet(isMutedInt, buttonToHandle >> 4);
 			} 
-
+			Serial.println(isMutedInt, BIN);
 			sendMutes();
 
 			
@@ -34,7 +34,7 @@ void handlePageButtons(byte buttonToHandle) {
 
 		}
 		else {
-			triggerImmediately(pageMode - 1, (buttonToHandle >> 4) + scrollOffset + 1);
+			triggerImmediately(pageMode - 1, (buttonToHandle >> 4) + scrollOffset);
 		}
 
 	}
