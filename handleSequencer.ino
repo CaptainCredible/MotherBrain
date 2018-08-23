@@ -67,19 +67,36 @@ void handleStep() {
 	for (byte track = 0; track < numberOfTracks; track++) {					//repeat for every track 0-15
 		int matrixCursor = currentStep + (track * matrixTrackOffset);			//check current step for notes
 		//if (isMuted[track]) {
-		if (bitRead(isMutedInt,track)) {
+		if (bitRead(isMutedInt, track)) {
 			tracksBuffer16x8[track] = 0;
 		}
 		else {
-			tracksBuffer16x8[track] = seqMatrix[matrixCursor];	//added a test to see if its muted				//	sendWire2microBitTrackAndNote(seqMatrix[matrixCursor],track);			//send that note to microbit (ask microbit to request it.
+			if (isPoly[track]) {
+
+				//code to invert notes sent
+				uint16_t intermedium = seqMatrix[matrixCursor];
+				for (int i = 0; i < 16; i++) {
+					if (bitRead(intermedium, i)) {
+						bitSet(tracksBuffer16x8[track], 15 - i);
+					}
+					else {
+						bitClear(tracksBuffer16x8[track], 15 - i);
+					}
+				}
+
+				//tracksBuffer16x8[track] = intermedium;	//added a test to see if its muted				//	sendWire2microBitTrackAndNote(seqMatrix[matrixCursor],track);			//send that note to microbit (ask microbit to request it.
+			}
+			else {
+				tracksBuffer16x8[track] = (seqMatrix[matrixCursor]);	//added a test to see if its muted				//	sendWire2microBitTrackAndNote(seqMatrix[matrixCursor],track);			//send that note to microbit (ask microbit to request it.
+			}
 		}
-		
+
 	}
 	tracksBuffer16x8[8] = currentStep; //slot number eight is where we send the current step number
 	tracksBuffer16x8[9] = isMutedInt;  //slot 9 is where the mutes are stored
 	sendTracksBuffer();
-									   ////Serial.println(tracksBuffer16x8[8]);
-	
+	////Serial.println(tracksBuffer16x8[8]);
+
 }
 
 void clearTracksBuffer() {

@@ -34,7 +34,12 @@ void handlePageButtons(byte buttonToHandle) {
 
 		}
 		else {
-			triggerImmediately(pageMode - 1, (buttonToHandle >> 4) + scrollOffset);
+			if(pageMode != 8 & pageMode != 9){
+			triggerImmediately(pageMode - 1, 15-((buttonToHandle >> 4) + scrollOffset));
+			}
+			else {
+				triggerImmediately(pageMode - 1, (buttonToHandle >> 4) + scrollOffset);
+			}
 		}
 
 	}
