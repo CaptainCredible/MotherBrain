@@ -279,11 +279,12 @@ void loop() {
 	debugLoop();
 #else
 	handlePageNumDisplayTimeouts();
+	usbmidiprocessing();
 	handleClock();
 	launchPad.read();
 	checkTimeOut(); //reset interruptPin and isSending if the microbit missed the message
 	handleKnobsAndButtons();
-	usbmidiprocessing();
+	
 #endif // DEBUG
 	
 }
