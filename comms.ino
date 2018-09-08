@@ -63,6 +63,7 @@ void sendTracksBuffer() {
 }
 
 void sendUsbMidiPackage() {
+	midiTracksBuffer16x8[8] = 200; //200 shal be the magic number
 	sentAMidiBuffer = true; //flag the fact that we are sending midi buffer
 	sendTracksBuffer();
 }
@@ -91,6 +92,7 @@ void measureI2CSuccessRate() {
 void requestEvent() {  //this is what happens when the microbit asks for a message
 	if (sentAMidiBuffer) {  //this used to be only midi buffer, but is also used by other functions that need to send immediately
 		I2C_writeAnything(midiTracksBuffer16x8);
+		//Serial.println(midiTracksBuffer16x8[8]);
 	}
 	else {
 		I2C_writeAnything(tracksBuffer16x8);
