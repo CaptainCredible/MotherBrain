@@ -56,6 +56,14 @@ unsigned long i2cFails = 0;
 unsigned long successfullI2cs = 0;
 
 void sendTracksBuffer() {
+	Serial.println("tracksBuffer = ");
+	for (int i = 0; i < 10; i++) {
+		Serial.println(tracksBuffer16x8[i]);
+	}
+	Serial.println("");
+
+
+
 	digitalWrite(interruptPin, LOW); //start by telling microbit to request track
 	//i2cTimer = micros();
 	isSending = true;
@@ -110,7 +118,6 @@ void clearMidiTracksBuffer() {									//also sets sentAMidiBuffer to false
 	for (byte i = 0; i < 8; i++) {								//for every channel entry in buffer
 		midiTracksBuffer16x8[i] = 0;							// clear buffer
 	}
-	//debugInt(midiTracksBuffer16x8[7]);
 	sentAMidiBuffer = false;									//set flag back to normal buffers.
 }
 
@@ -127,13 +134,7 @@ void checkTimeOut() {
 
 
 void triggerImmediately(byte track, byte note) {
-	if (track != 0) {
 		hijackUSBMidiTrackBuffer(note, track);
-	}
-//	Serial.print("Send track = ");
-//	Serial.print(track);
-//	Serial.print("note = ");
-//	Serial.println(note);
 }
 
 void sendMutes() {
