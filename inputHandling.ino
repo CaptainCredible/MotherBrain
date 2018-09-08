@@ -405,19 +405,24 @@ void handleKnobsAndButtons() {
 	}
 
 	if (buttB) {
-		int BPM = 10 + (knobA >> 2);
-		int beatLength = 60000 / BPM;
-		stepDuration = beatLength >> 3;
-		/*
-		////Serial.print("BPM = ");
-		////Serial.println(BPM);
-		////Serial.print("beatLength = ");
-		////Serial.println(beatLength);
-		////Serial.print("Stepduration = ");
-		////Serial.println(stepDuration);
-		////Serial.println();
-		////Serial.println();
-		*/
+		if (SHIFT) {
+			storeSeq();
+		}
+		else {
+			int BPM = 10 + (knobA >> 2);
+			int beatLength = 60000 / BPM;
+			stepDuration = beatLength >> 3;
+			/*
+			////Serial.print("BPM = ");
+			////Serial.println(BPM);
+			////Serial.print("beatLength = ");
+			////Serial.println(beatLength);
+			////Serial.print("Stepduration = ");
+			////Serial.println(stepDuration);
+			////Serial.println();
+			////Serial.println();
+			*/
+		}
 	}
 
 	if (buttC && !oldButtC) {
@@ -450,3 +455,4 @@ void handleKnobsAndButtons() {
 	////////Serial.println(stepDuration);
 	//	//////Serial.println(buttX);
 }
+

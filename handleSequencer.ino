@@ -112,3 +112,46 @@ void radioSendClockTick() {
 void radioSendStartAndTempo(byte tempo) {
 	//sendWire2microBitTrackAndNote(102, tempo);			//send that note to microbit (ask microbit to request it.
 }
+
+void storeSeq() {
+	clearVertButts();
+	for (int i = 0; i < 256; i++) {
+		uint8_t MSB = seqMatrix[i] >> 8;
+		uint8_t LSB = seqMatrix[i] && 0b0000000011111111;
+		int writeCursor = i * 2;
+		EEPROM.write(writeCursor, MSB);
+		EEPROM.write(writeCursor + 1, LSB);
+	}
+	for (int i = 0; i < 8; i++) {
+		launchPad.sendNoteOn(vertButts[i], trackColours[i], 1);
+		delay(100);
+		//////Serial.println(i);
+	}
+	EEPROM.write(1000, 123);
+	Serial.println("wrote 123");
+	Serial.print("Read:  ");
+	Serial.println(EEPROM.read(1000));
+	updateVertButts();
+}
+
+void recallSeq() {
+	clearVertButts();
+	int loadingBar = 0;
+	for (int i = 0; i < 256; i++) {
+		
+		int readCursor = i * 2;
+		uint8_t MSB = EEPROM.read(readCursor);
+		uint8_t LSB = EEPROM.read(readCursor + 1);
+		uint16_t seqValToWrite = (MSB << 8) + LSB;
+		seqMatrix[i] = seqValToWrite;
+		//delay(10);
+		//if (i >> 5 > loadingBar) {
+		//	loadingBar = i >> 5;
+		//	launchPad.sendNoteOn(vertButts[i - 1], trackColours[i - 1], 1);
+
+		//}
+	}
+	updateVertButts();
+
+}
+

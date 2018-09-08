@@ -1,9 +1,10 @@
 //#define DEBUG
 
-
+#include <EEPROM.h>
 #include <MIDI.h>
 #include <Wire.h>
 #include <I2C_Anything.h>
+
 
 #define LEDPIN 14
 #define interruptPin 16
@@ -72,7 +73,7 @@ unsigned int seqMatrix[256] = {
 0,0,0,1,0,0,0,0,	0,0,0,0,1,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,
 0,0,0,1,0,0,0,0,	0,0,0,1,0,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,
 0,0,0,1,0,0,0,0,	0,0,1,0,0,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,
-0,0,0,1,0,0,0,0,	0,1,1,1,1,1,1,0,	0,1,1,1,1,1,0,0,	0,0,0,0,0,1,0,0};
+0,0,0,1,0,0,0,0,	0,1,1,1,1,1,1,0,	0,1,1,1,1,1,0,0,	0,0,0,0,0,1,0,0 };
 
 byte startStep = 0;
 byte endStep = 32;
@@ -191,7 +192,7 @@ bool topLedWasSet[8] = { false,false,false,false, false,false,false,false, }; //
 void setup()
 {
 
-	
+
 	pinMode(buttApin, INPUT_PULLUP);
 	pinMode(buttBpin, INPUT_PULLUP);
 	pinMode(buttCpin, INPUT_PULLUP);
@@ -221,9 +222,9 @@ void setup()
 #else
 	Wire.onRequest(requestEvent); // register event
 #endif // DEBUG
-	
-		
-	
+
+
+
 
 	clearPage();
 
@@ -232,13 +233,22 @@ void setup()
 	}
 	//changePageMode(pageMode);
 	delay(2000);
-	for (int i = 0; i < 8; i++) {
-		launchPad.sendNoteOn(vertButts[i], trackColours[i], 1);
-		delay(100);
-		//////Serial.println(i);
+	if (EEPROM.read(1000) == 123) { //look for magic number that means we have stored something in EEPROM
+		digitalWrite(shiftLed, HIGH);
+		recallSeq();
+		Serial.println("Found seq in EEPROM, LOADED");
 	}
+	else {
+		Serial.println("no seq in EEPROM");
+	}
+	//for (int i = 0; i < 8; i++) {
+	//	launchPad.sendNoteOn(vertButts[i], trackColours[i], 1);
+	//	delay(100);
+		//////Serial.println(i);
+	//}
 	//launchPad.sendNoteOff(127, 127, 10);
 	updatePage(0);
+	digitalWrite(shiftLed, LOW);
 }
 
 
@@ -286,9 +296,9 @@ void loop() {
 	launchPad.read();
 	checkTimeOut(); //reset interruptPin and isSending if the microbit missed the message
 	handleKnobsAndButtons();
-	
+
 #endif // DEBUG
-	
+
 }
 
 bool numIsDisplayed = false;
