@@ -25,20 +25,20 @@ void handlePageButtons(byte buttonToHandle) {
 			} 
 			Serial.println(isMutedInt, BIN);
 			sendMutes();
-
-			
-			//isMuted[buttonToHandle >> 4] = !isMuted[buttonToHandle >> 4];
-	//		Serial.print("muted ");
-	//		Serial.println(buttonToHandle >> 4);
 			setAllVertButts();
-
 		}
 		else {
+			Serial.print("pagemode = ");
+			Serial.println(pageMode);
 			if(pageMode != 8 & pageMode != 9){
 			triggerImmediately(pageMode - 1, 15-((buttonToHandle >> 4) + scrollOffset));
 			}
-			else {
-				triggerImmediately(pageMode - 1, (buttonToHandle >> 4) + scrollOffset);
+			else { //if its a mono midi track
+				uint16_t myNumber = (buttonToHandle>>4);
+				Serial.print("myNumber = ");
+				Serial.println(myNumber);
+
+				triggerImmediately(pageMode - 1, myNumber);
 			}
 		}
 
