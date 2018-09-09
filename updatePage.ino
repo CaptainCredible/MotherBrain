@@ -57,7 +57,7 @@ void displayPageNumber() {
 				forceUpdate = false;
 				//digitalWrite(ledApin, forceUpdate);
 				if (prevPage != currentPage) {
-					//Serial.println("PING");
+					////Serial.println("PING");
 					//displayPageNumber();	
 				}
 				prevPage = currentPage;
@@ -98,7 +98,7 @@ void displayPageNumber() {
 
 		byte trackPageWeAreHandling = trackPageToHandle - 1; //move 1-8 to 0-7
 		if (isPoly[trackPageWeAreHandling]) {
-			//Serial.println("drawing poly track");
+			////Serial.println("drawing poly track");
 			for (byte col = 0; col < 8; col++) {
 				int seqMatrixCursor = col + (currentPage * 8) + (trackPageWeAreHandling * matrixTrackOffset);
 				int val = seqMatrix[seqMatrixCursor];
@@ -112,7 +112,7 @@ void displayPageNumber() {
 			}
 		}
 		else {//handle the non poly 127 note tracks
-			//Serial.println("drawing MIDI track");
+			////Serial.println("drawing MIDI track");
 			for (byte col = 0; col < 8; col++) {																				// use col to handle what column we are drawing on left to right
 				int seqMatrixCursor = col + (currentPage * 8) + (trackPageWeAreHandling * matrixTrackOffset);					// find right seqmatrix slot to read from
 				unsigned int rawVal = seqMatrix[seqMatrixCursor];																// 
@@ -125,15 +125,15 @@ void displayPageNumber() {
 				rawVal = rawVal >> 8;					//use first 8 bits
 
 				if (col == 0) {							//debug
-					//Serial.print("rawVal");
-					//Serial.println(rawVal);
+					////Serial.print("rawVal");
+					////Serial.println(rawVal);
 				}
 				byte invertedVal = 127 - rawVal;			//invert to make the grid the right way round
 				byte val = invertedVal - scrollOffset;			// translate to our viewing space by acounting for how far we have scrolled
 
 				if (col == 0) {
-					//Serial.print("val = ");
-					//Serial.println(val);
+					////Serial.print("val = ");
+					////Serial.println(val);
 				}
 				if (val > 0 & val < 9) {
 					int LPmatrixCursor = col + ((val - 1) * 8);
@@ -167,7 +167,7 @@ void displayPageNumber() {
 
 	byte reset[3] = { 176,0,0 };
 	void clearPage() {
-		//////Serial.println("CLEARED PAGE");
+		////////Serial.println("CLEARED PAGE");
 		Serial1.write(reset, 3);
 		//delay(1000);
 
@@ -230,8 +230,8 @@ void displayPageNumber() {
 	}
 #define currentPagePlayingCol 33
 	void handleCurrentPagePlayingDisplay() {
-		//Serial.print("handledTopLeds page ");
-		//Serial.println(currentPage);
+		////Serial.print("handledTopLeds page ");
+		////Serial.println(currentPage);
 		if (!topLedWasSet[currentPageThatIsPlaying]) {
 			launchPad.sendControlChange(topButts[currentPageThatIsPlaying], currentPagePlayingCol, 1);
 		}
@@ -264,7 +264,7 @@ void displayPageNumber() {
 		}
 		else if (currentPage == lastStep >> 3) {
 			launchPad.sendControlChange(topButts[lastStep % 8], 0, 1);
-			//Serial.println(lastStep);
+			////Serial.println(lastStep);
 		}
 
 	}
@@ -272,19 +272,19 @@ void displayPageNumber() {
 	
 
 	void changePageMode(byte newMode) {
-		//Serial.print("changed pagemode to ");
+		////Serial.print("changed pagemode to ");
 		scrollOffset = trackScrollOffsets[newMode + altMidiTrack];
-		Serial.print("scrollOffset = ");
-		Serial.println(trackScrollOffsets[newMode + altMidiTrack]);
+		//Serial.print("scrollOffset = ");
+		//Serial.println(trackScrollOffsets[newMode + altMidiTrack]);
 
 		if (newMode != pageMode) { //if a track is selected
 			clearVertButts();
 			pageMode = newMode;
-			//Serial.print("pagemode = ");
-			//Serial.println(pageMode);
+			////Serial.print("pagemode = ");
+			////Serial.println(pageMode);
 			altMidiTrack = SHIFT;
-			//Serial.print("isPoly = ");
-			//Serial.println(isPoly[pageMode-1]);
+			////Serial.print("isPoly = ");
+			////Serial.println(isPoly[pageMode-1]);
 		}
 		else if (pageMode == 8 && !altMidiTrack) {
 			altMidiTrack = true;
@@ -298,8 +298,8 @@ void displayPageNumber() {
 			altMidiTrack = false;
 			digitalWrite(ZamLed, altMidiTrack);
 		}
-		//Serial.print("pageMode = ");
-		//Serial.println(pageMode);
+		////Serial.print("pageMode = ");
+		////Serial.println(pageMode);
 		forceUpdate = true;
 		updatePage(pageMode);
 	}

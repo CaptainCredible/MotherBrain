@@ -23,20 +23,20 @@ void handlePageButtons(byte buttonToHandle) {
 			else {
 				bitSet(isMutedInt, buttonToHandle >> 4);
 			} 
-			Serial.println(isMutedInt, BIN);
+			//Serial.println(isMutedInt, BIN);
 			sendMutes();
 			setAllVertButts();
 		}
 		else {
-			Serial.print("pagemode = ");
-			Serial.println(pageMode);
+			//Serial.print("pagemode = ");
+			//Serial.println(pageMode);
 			if(pageMode != 8 & pageMode != 9){
 			triggerImmediately(pageMode - 1, 15-((buttonToHandle >> 4) + scrollOffset));
 			}
 			else { //if its a mono midi track
 				uint16_t myNumber = (buttonToHandle>>4);
-				Serial.print("myNumber = ");
-				Serial.println(myNumber);
+				//Serial.print("myNumber = ");
+				//Serial.println(myNumber);
 
 				triggerImmediately(pageMode - 1, myNumber);
 			}
@@ -117,8 +117,8 @@ void handleLPNoteOn(byte channel, byte pitch, byte velocity) {
 		else { //if page mode isnt 0, we are not in overview mode and note
 			byte trackSelector = pageMode - 1; // this is the track we are writing to basically
 			int matrixCursor = LPtoMatrix[pitch % 16] + (currentPage * 8) + trackSelector * matrixTrackOffset; //this is what matrix entry we are editing
-			////Serial.print("isPoly = ");
-			////Serial.println(isPoly[trackSelector]);
+			//////Serial.print("isPoly = ");
+			//////Serial.println(isPoly[trackSelector]);
 			if (isPoly[trackSelector]) {								//if this is a polyphonic 8 output track
 				if (bitRead(seqMatrix[matrixCursor], rowPressed)) {		//if this bit is set
 					bitClear(seqMatrix[matrixCursor], rowPressed);		//clear it
@@ -129,14 +129,14 @@ void handleLPNoteOn(byte channel, byte pitch, byte velocity) {
 					LPSetLedRaw(pitch, trackColours[trackSelector]);
 					//LPSetLed(pitch, trackColours[rowPressed]);		//turn that LED off
 				}
-				////////Serial.print("that entry is now = ");
-				////////Serial.print(seqMatrix[matrixCursor]);
-				////////Serial.print(" in binary = ");
-				////////Serial.println(seqMatrix[matrixCursor], BIN);
+				//////////Serial.print("that entry is now = ");
+				//////////Serial.print(seqMatrix[matrixCursor]);
+				//////////Serial.print(" in binary = ");
+				//////////Serial.println(seqMatrix[matrixCursor], BIN);
 			}
 			else {														//if this is a mono 127 output track
-				////Serial.print("rowPressed = ");
-				////Serial.println(rowPressed);
+				//////Serial.print("rowPressed = ");
+				//////Serial.println(rowPressed);
 
 				unsigned int storedVal = seqMatrix[matrixCursor];
 				if (!altMidiTrack) {
@@ -166,8 +166,8 @@ void handleLPNoteOn(byte channel, byte pitch, byte velocity) {
 				else {
 					seqMatrix[matrixCursor] = seqMatrix[matrixCursor] & 0b0000000011111111;  //clear MSB
 					seqMatrix[matrixCursor] = seqMatrix[matrixCursor] | valToWrite << 8;		//put our valtowrite in MSB
-					////Serial.print("wrote to alt track");
-					////Serial.println(seqMatrix[matrixCursor >> 8]);
+					//////Serial.print("wrote to alt track");
+					//////Serial.println(seqMatrix[matrixCursor >> 8]);
 				}
 
 
@@ -194,7 +194,7 @@ void handleLPNoteOff(byte channel, byte pitch, byte velocity) {
 void handleLPCC(byte channel, byte CC, byte val) {
 	byte buttWasPressed = CC - 103;
 	if (val > 0) {
-		////////Serial.println(buttWasPressed);
+		//////////Serial.println(buttWasPressed);
 		switch (buttWasPressed)
 		{
 		case 1:
@@ -281,8 +281,8 @@ void handleLPCC(byte channel, byte CC, byte val) {
 					pageSelect--;					//else decrement page by one
 				}
 				updatePage(pageMode);
-				////////Serial.print("pageSelect = ");
-				////////Serial.println(pageSelect);
+				//////////Serial.print("pageSelect = ");
+				//////////Serial.println(pageSelect);
 			}
 			break;
 
@@ -297,8 +297,8 @@ void handleLPCC(byte channel, byte CC, byte val) {
 					pageSelect = 0;
 				}
 				updatePage(pageMode);
-				//////Serial.print("pageSelect = ");
-				//////Serial.println(pageSelect);
+				////////Serial.print("pageSelect = ");
+				////////Serial.println(pageSelect);
 			}
 			break;
 
@@ -314,8 +314,8 @@ void handleLPCC(byte channel, byte CC, byte val) {
 				trackScrollOffsets[pageMode + altMidiTrack] = scrollOffset; // remember settings per track to be recalled when pagemode changes
 				forceUpdate = true;
 				updatePage(currentPage);
-				Serial.print("scrollOffset = ");
-				Serial.println(scrollOffset);
+				//Serial.print("scrollOffset = ");
+				//Serial.println(scrollOffset);
 			}
 			break;
 		case 8:
@@ -330,23 +330,23 @@ void handleLPCC(byte channel, byte CC, byte val) {
 				trackScrollOffsets[pageMode + altMidiTrack] = scrollOffset; // remember settings per track to be recalled when pagemode changesfg
 				forceUpdate = true;
 				updatePage(currentPage);
-				Serial.print("scrollOffset = ");
-				Serial.println(scrollOffset);
+				//Serial.print("scrollOffset = ");
+				//Serial.println(scrollOffset);
 			}
 
 			break;
 		default:
 			trackToSend = buttWasPressed - 1;
-			////////Serial.print("trackToSend = ");
-			////////Serial.println(trackToSend);
+			//////////Serial.print("trackToSend = ");
+			//////////Serial.println(trackToSend);
 			break;
 		}
 	}
 }
 
 void limitScrollOffset() {
-	////Serial.print("ispoly = ");
-	////Serial.println(isPoly[pageMode - 1]);
+	//////Serial.print("ispoly = ");
+	//////Serial.println(isPoly[pageMode - 1]);
 	if (isPoly[pageMode - 1]) {
 		if (scrollOffset > 8) {
 
@@ -365,7 +365,7 @@ void limitScrollOffset() {
 void handleKnobsAndButtons() {
 	int oldKnobA = knobA;
 	knobA = analogRead(A1);
-	//Serial.println(analogRead(A1));
+	////Serial.println(analogRead(A1));
 
 	//int oldKnobB = knobB;
 	//knobB = analogRead(A0);
@@ -407,20 +407,22 @@ void handleKnobsAndButtons() {
 	if (buttB) {
 		if (SHIFT) {
 			storeSeq();
+			//storeSeqAlt();
+			//EEPROMTest();
 		}
 		else {
 			int BPM = 10 + (knobA >> 2);
 			int beatLength = 60000 / BPM;
 			stepDuration = beatLength >> 3;
 			/*
-			////Serial.print("BPM = ");
-			////Serial.println(BPM);
-			////Serial.print("beatLength = ");
-			////Serial.println(beatLength);
-			////Serial.print("Stepduration = ");
-			////Serial.println(stepDuration);
-			////Serial.println();
-			////Serial.println();
+			//////Serial.print("BPM = ");
+			//////Serial.println(BPM);
+			//////Serial.print("beatLength = ");
+			//////Serial.println(beatLength);
+			//////Serial.print("Stepduration = ");
+			//////Serial.println(stepDuration);
+			//////Serial.println();
+			//////Serial.println();
 			*/
 		}
 	}
@@ -451,8 +453,8 @@ void handleKnobsAndButtons() {
 		}
 	}
 
-	////////Serial.print("stepDuration ");
-	////////Serial.println(stepDuration);
-	//	//////Serial.println(buttX);
+	//////////Serial.print("stepDuration ");
+	//////////Serial.println(stepDuration);
+	//	////////Serial.println(buttX);
 }
 

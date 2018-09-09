@@ -36,8 +36,8 @@ digitalWrite(interruptPin, LOW); //start by telling microbit to request track
 i2cTimer = micros();
 isSending = true;
 timeOutStamp = millis();
-//////Serial.print("sent sendTracksBuffer interrupt and currentStep is ");
-//////Serial.println(currentStep);
+////////Serial.print("sent sendTracksBuffer interrupt and currentStep is ");
+////////Serial.println(currentStep);
 //delay(1); //change so there is a timer polled and things can be done in background!
 }
 
@@ -56,11 +56,11 @@ unsigned long i2cFails = 0;
 unsigned long successfullI2cs = 0;
 
 void sendTracksBuffer() {
-	Serial.println("tracksBuffer = ");
+	//Serial.println("tracksBuffer = ");
 	for (int i = 0; i < 10; i++) {
-		Serial.println(tracksBuffer16x8[i]);
+		//Serial.println(tracksBuffer16x8[i]);
 	}
-	Serial.println("");
+	//Serial.println("");
 
 
 
@@ -79,19 +79,19 @@ void sendUsbMidiPackage() {
 
 void debugRequestEvent() {
 	i2cTimer = micros() - i2cTimer;
-	////Serial.print("transmission took ");
-	////Serial.print(i2cTimer);
-	////Serial.println(" microseconds!");
+	//////Serial.print("transmission took ");
+	//////Serial.print(i2cTimer);
+	//////Serial.println(" microseconds!");
 	isSending = false;
 	digitalWrite(interruptPin, HIGH);
 }
 
 void measureI2CSuccessRate() {
-	////Serial.print("i2c OK! ");
+	//////Serial.print("i2c OK! ");
 	successfullI2cs++;
-	////Serial.print(successfullI2cs);
-	////Serial.print("   fails ");
-	////Serial.println(i2cFails);
+	//////Serial.print(successfullI2cs);
+	//////Serial.print("   fails ");
+	//////Serial.println(i2cFails);
 
 }
 
@@ -100,7 +100,7 @@ void measureI2CSuccessRate() {
 void requestEvent() {  //this is what happens when the microbit asks for a message
 	if (sentAMidiBuffer) {  //this used to be only midi buffer, but is also used by other functions that need to send immediately
 		I2C_writeAnything(midiTracksBuffer16x8);
-		//Serial.println(midiTracksBuffer16x8[8]);
+		////Serial.println(midiTracksBuffer16x8[8]);
 	}
 	else {
 		I2C_writeAnything(tracksBuffer16x8);
@@ -127,7 +127,7 @@ void checkTimeOut() {
 	if (millis() - timeOutStamp > timeOut && isSending) {
 		digitalWrite(interruptPin, HIGH);
 		isSending = false;
-		Serial.println(" i2c TIMEOUT! ");
+		//Serial.println(" i2c TIMEOUT! ");
 		i2cFails++;
 	}
 }

@@ -75,6 +75,8 @@ unsigned int seqMatrix[256] = {
 0,0,0,1,0,0,0,0,	0,0,1,0,0,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,
 0,0,0,1,0,0,0,0,	0,1,1,1,1,1,1,0,	0,1,1,1,1,1,0,0,	0,0,0,0,0,1,0,0 };
 
+unsigned int dummySeqMatrix[256];
+
 byte startStep = 0;
 byte endStep = 32;
 int seqLength = 32; // temporary debug seqlength, needs to be settable by user
@@ -236,15 +238,15 @@ void setup()
 	if (EEPROM.read(1000) == 123) { //look for magic number that means we have stored something in EEPROM
 		digitalWrite(shiftLed, HIGH);
 		recallSeq();
-		Serial.println("Found seq in EEPROM, LOADED");
+		//Serial.println("Found seq in EEPROM, LOADED");
 	}
 	else {
-		Serial.println("no seq in EEPROM");
+		//Serial.println("no seq in EEPROM");
 	}
 	//for (int i = 0; i < 8; i++) {
 	//	launchPad.sendNoteOn(vertButts[i], trackColours[i], 1);
 	//	delay(100);
-		//////Serial.println(i);
+		////////Serial.println(i);
 	//}
 	//launchPad.sendNoteOff(127, 127, 10);
 	updatePage(0);
@@ -278,7 +280,7 @@ void debugLoop() {
 	sendTracksBuffer();
 	//send32BitInt();
 	//send64BitInt();
-	////Serial.println("Alive");
+	//////Serial.println("Alive");
 	delay(100);
 	launchPad.sendNoteOn(1, 0, 1);
 	checkTimeOut(); //reset interruptPin and isSending if the microbit missed the message

@@ -13,15 +13,15 @@ void calculateStartAndEndStep() {
 		endStep = desiredEndStep;
 	}
 	/*
-	Serial.print("desiredStartStep = ");
-	Serial.print(desiredStartStep);
-	Serial.print("   desiredEndStep = ");
-	Serial.println(desiredEndStep);
+	//Serial.print("desiredStartStep = ");
+	//Serial.print(desiredStartStep);
+	//Serial.print("   desiredEndStep = ");
+	//Serial.println(desiredEndStep);
 
-	Serial.print("actualStartStep = ");
-	Serial.print(startStep);
-	Serial.print("   actualEndStep = ");
-	Serial.println(endStep);
+	//Serial.print("actualStartStep = ");
+	//Serial.print(startStep);
+	//Serial.print("   actualEndStep = ");
+	//Serial.println(endStep);
 	*/
 
 
@@ -30,10 +30,10 @@ void calculateStartAndEndStep() {
 void handleClock() {
 	if (runClock) {
 		unsigned long now = millis();
-		//Serial.print("clocktimer = ");
-		//Serial.println(clockTimer);
-		//Serial.print("        Now = ");
-		//Serial.println(now);
+		////Serial.print("clocktimer = ");
+		////Serial.println(clockTimer);
+		////Serial.print("        Now = ");
+		////Serial.println(now);
 		if (now >= clockTimer + stepDuration) {
 			int diff = now - (clockTimer + stepDuration); // find out if we overshot so we can avoid drifting and instead have just a spot of jitter
 			if (diff > 5 || diff < 0) {									//avoid adjusting for diff when there are other delays causing problems
@@ -57,8 +57,8 @@ void handleClock() {
 			}
 			handleStep();
 			updatePage(pageMode);
-			//Serial.print("diff = ");
-			//Serial.println(diff);
+			////Serial.print("diff = ");
+			////Serial.println(diff);
 		}
 	}
 }
@@ -95,7 +95,7 @@ void handleStep() {
 	tracksBuffer16x8[8] = currentStep; //slot number eight is where we send the current step number
 	tracksBuffer16x8[9] = isMutedInt;  //slot 9 is where the mutes are stored
 	sendTracksBuffer();
-	////Serial.println(tracksBuffer16x8[8]);
+	//////Serial.println(tracksBuffer16x8[8]);
 
 }
 
@@ -113,25 +113,120 @@ void radioSendStartAndTempo(byte tempo) {
 	//sendWire2microBitTrackAndNote(102, tempo);			//send that note to microbit (ask microbit to request it.
 }
 
+void EEPROMTest() {
+	for (int i = 0; i < 512; i++) {
+		EEPROM.write(i, 111);
+		int poop = EEPROM.read(i);
+		//Serial.print(i);
+		//Serial.print(" read ");
+		//Serial.print(poop);
+		if (poop != 111) {
+			//Serial.print(" ERROR!");
+		}
+		//Serial.println();
+	}
+	EEPROM.write(1000, 0);
+}
+
+void storeSeqAlt() {
+	//handle MSBs
+	for (int i = 0; i < 256; i++) {
+		int writeCursor = i * 2;
+		uint16_t MSB = seqMatrix[i] >> 8;
+		//Serial.print("w MSB ");
+		//Serial.print(MSB);
+		EEPROM.write(writeCursor, MSB);
+		uint16_t readMSB = EEPROM.read(writeCursor);
+		//Serial.print("  r MSB ");
+		//Serial.print(readMSB);
+		if (MSB != readMSB) {
+			//Serial.print(" ERROR!!!!");
+		}
+		//Serial.println();
+
+	}
+	for (int i = 1; i < 257; i++) {
+		int writeCursor = i * 2;
+		uint16_t LSB = seqMatrix[i] & 0b0000000011111111;
+		//Serial.print("w LSB ");
+		//Serial.print(LSB);
+		EEPROM.write(writeCursor, LSB);
+		uint16_t readLSB = EEPROM.read(writeCursor);
+		//Serial.print("  r LSB ");
+		//Serial.print(readLSB);
+		if (LSB != readLSB) {
+			//Serial.print(" ERROR!!!!");
+		}
+		//Serial.println();
+
+	}
+	EEPROM.write(1000, 0);
+}
+
 void storeSeq() {
 	clearVertButts();
 	for (int i = 0; i < 256; i++) {
-		uint8_t MSB = seqMatrix[i] >> 8;
-		uint8_t LSB = seqMatrix[i] && 0b0000000011111111;
+		uint16_t MSB = seqMatrix[i] >> 8;
+		uint16_t LSB = seqMatrix[i] & 0b0000000011111111;
+
 		int writeCursor = i * 2;
+	
 		EEPROM.write(writeCursor, MSB);
+		//Serial.print("w MSB ");
+		//Serial.print(MSB);
+		//Serial.print("   r MSB ");
+		byte MSBread = EEPROM.read(writeCursor);
+		//Serial.print(MSBread);
 		EEPROM.write(writeCursor + 1, LSB);
+		//Serial.print("    w LSB ");
+		//Serial.print(MSB);
+		//Serial.print("   r LSB ");
+		byte LSBread = EEPROM.read(writeCursor + 1);
+		//Serial.print(LSBread);
+		if (LSB != LSBread) {
+			//Serial.print(" LSB MISMATCH!!!   ");
+		}
+		if (MSB != MSBread) {
+			//Serial.print(" MSB MISMATCH!!!   ");
+		}
+
+		//Serial.println();
 	}
 	for (int i = 0; i < 8; i++) {
 		launchPad.sendNoteOn(vertButts[i], trackColours[i], 1);
 		delay(100);
-		//////Serial.println(i);
+		////////Serial.println(i);
 	}
 	EEPROM.write(1000, 123);
-	Serial.println("wrote 123");
-	Serial.print("Read:  ");
-	Serial.println(EEPROM.read(1000));
+	//Serial.println("wrote 123");
+	//Serial.print("Read:  ");
+	//Serial.println(EEPROM.read(1000));
 	updateVertButts();
+	//compareSeqMatrixes();
+}
+
+void compareSeqMatrixes() {
+	recallDummySeq();
+	for (int i = 0; i < 256; i++) {
+		//Serial.print(seqMatrix[i]);
+		//Serial.print("-");
+		//Serial.print(dummySeqMatrix[i]);
+			if (dummySeqMatrix[i] != seqMatrix[i]) {
+				//Serial.print("DIFF!!!");
+		}
+		//Serial.println();
+	}
+}
+
+void recallDummySeq() {
+	for (int i = 0; i < 256; i++) {
+
+		int readCursor = i * 2;
+		uint16_t MSB = EEPROM.read(readCursor);
+		uint16_t LSB = EEPROM.read(readCursor + 1);
+		uint16_t seqValToWrite = (MSB << 8) + LSB;
+		dummySeqMatrix[i] = seqValToWrite;
+	}
 }
 
 void recallSeq() {
