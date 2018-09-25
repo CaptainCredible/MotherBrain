@@ -7,7 +7,7 @@ unsigned long prevNoteOnTime = 0;
 bool waitingForTimeOut = false;
 
 void usbmidiprocessing() {
-
+	internalClockSelect = runClock;
 	while (MIDIUSB.available() > 0) {
 		MIDIEvent e = MIDIUSB.read();
 		// IF NOTE ON WITH VELOCITY GREATER THAN ZERO
@@ -27,6 +27,8 @@ void usbmidiprocessing() {
 		else if (e.type == TICK) {
 			if (!internalClockSelect) {
 				handleUsbMidiClockTicks();
+				midiClockRunning = true;
+				//midiClockStep();
 			}
 			if (e.m1 == 252) {  //this is stop
 				if (!internalClockSelect) {
@@ -57,7 +59,7 @@ void usbmidiprocessing() {
 
 
 void resetSeq() {
-
+	currentStep = -1;
 }
 
 void debugInt(unsigned int valToPrint) {
@@ -117,7 +119,12 @@ void HandleUsbNoteOff(byte note, byte velocity, byte channel) {
 
 }
 
+
+byte midiClockCounter = 5;
 void handleUsbMidiClockTicks() {
-
+	midiClockCounter++;
+	midiClockCounter = midiClockCounter % midiClockDiv;
+	if (midiClockCounter == 0) {
+		midiClockStep();
+	}
 }
-

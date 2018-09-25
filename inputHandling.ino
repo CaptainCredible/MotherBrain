@@ -396,6 +396,9 @@ void handleKnobsAndButtons() {
 	if (buttA && !oldButtA) {
 		if (!SHIFT) {
 			runClock = !runClock;
+			if (runClock) {
+				midiClockRunning = false;
+			}
 		}
 		else {
 			currentStep = -1;
@@ -411,9 +414,15 @@ void handleKnobsAndButtons() {
 			//EEPROMTest();
 		}
 		else {
-			int BPM = 10 + (knobA >> 2);
-			int beatLength = 60000 / BPM;
-			stepDuration = beatLength >> 3;
+			if (!midiClockRunning) {
+				int BPM = 10 + (knobA >> 2);
+				int beatLength = 60000 / BPM;
+				stepDuration = beatLength >> 3;
+			}
+			else { //if midi clock is running
+				midiClockDiv = 3 + ((knobA >> 8) * 3);
+			}
+
 			/*
 			//////Serial.print("BPM = ");
 			//////Serial.println(BPM);

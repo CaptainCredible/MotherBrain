@@ -27,6 +27,25 @@ void calculateStartAndEndStep() {
 
 }
 
+void midiClockStep() {
+	//runClock = false; //turn off internal clock
+	lastStep = currentStep;
+	currentStep++;
+	calculateStartAndEndStep();
+	if (currentStep >= endStep) {
+		currentStep = startStep;
+	}
+	handleTimeSig();
+	if (currentStep >> 3 != currentPageThatIsPlaying) {
+		previousPageThatWasPlaying = currentPageThatIsPlaying;
+		currentPageThatIsPlaying = currentStep >> 3;
+	}
+	handleStep();
+	updatePage(pageMode);
+	
+}
+
+
 void handleClock() {
 	if (runClock) {
 		unsigned long now = millis();

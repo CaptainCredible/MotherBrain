@@ -18,6 +18,7 @@
 #define followCol 32
 
 uint16_t isMutedInt = 0b0000000000000000;
+int midiClockDiv = 6;
 bool isMuted[8] = { false, false,false, false,false, false,false, false };
 unsigned long tapTempoTimer = 0;
 bool forceStep = false;
