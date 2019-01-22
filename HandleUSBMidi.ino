@@ -1,5 +1,6 @@
-
-
+bool intClock = false;
+unsigned long lastMidiClockReceivedTime = 0;
+byte midiClockCounter = 5;
 bool hadANoteOn = false;
 int USBReceiveTimeOutThresh = 3;
 unsigned long timeOutDeadline = 0;
@@ -20,26 +21,27 @@ void usbmidiprocessing() {
 		}
 		// IF NOTE ON W/ ZERO VELOCITY
 		else if ((e.type == NOTEON) && (e.m3 == 0)) {
-			if (!internalClockSelect) {
+			//if (!internalClockSelect) {
 				HandleUsbNoteOff(e.m2, e.m3, e.m1 - 144);
-			}
+			//}
 		}
 		else if (e.type == TICK) {
-			if (!internalClockSelect) {
+			//if (!internalClockSelect) {
 				handleUsbMidiClockTicks();
-				midiClockRunning = true;
 				//midiClockStep();
-			}
+			//}
 			if (e.m1 == 252) {  //this is stop
-				if (!internalClockSelect) {
+				//if (!internalClockSelect) {
 					midiClockRunning = false;
-				}
+					clearTopLedsArray();
+					handleTopLeds();
+				//}
 			}
 		}
 		else if (e.type == RESTART) {
-			if (!internalClockSelect) {
+			//if (!internalClockSelect) {
 				resetSeq();
-			}
+			//}
 		}
 	}
 	if (MIDIUSB.available() == 0 && hadANoteOn) {  //if there is no message but there was on prev iteration
@@ -120,8 +122,11 @@ void HandleUsbNoteOff(byte note, byte velocity, byte channel) {
 }
 
 
-byte midiClockCounter = 5;
 void handleUsbMidiClockTicks() {
+	runClock = false;
+	//Serial.println("turned off clock");
+	lastMidiClockReceivedTime = millis();
+	midiClockRunning = true;
 	midiClockCounter++;
 	midiClockCounter = midiClockCounter % midiClockDiv;
 	if (midiClockCounter == 0) {

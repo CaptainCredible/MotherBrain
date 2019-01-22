@@ -395,9 +395,12 @@ void handleKnobsAndButtons() {
 
 	if (buttA && !oldButtA) {
 		if (!SHIFT) {
-			runClock = !runClock;
+			if (!midiClockRunning) {
+				runClock = !runClock;
+			}
+			
 			if (runClock) {
-				midiClockRunning = false;
+				//midiClockRunning = false;
 			}
 		}
 		else {

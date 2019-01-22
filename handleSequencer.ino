@@ -1,3 +1,16 @@
+void handleRunClockActivation() {
+	Serial.print("midiclock ");
+	Serial.print(midiClockRunning);
+	Serial.print("  runClock ");
+	Serial.println(runClock);
+
+	if (midiClockRunning) { //if intClock is off
+		if (millis() - lastMidiClockReceivedTime > 2000) { // if its been more than 3 sec since we received a midiclock
+			midiClockRunning = false;
+		}
+	}	
+}
+
 void handleTimeSig() {
 	if (currentStep % 8 >= 8 - timeSig) {
 		currentStep += timeSig;
@@ -47,7 +60,7 @@ void midiClockStep() {
 
 
 void handleClock() {
-	if (runClock) {
+	if (runClock && !midiClockRunning) {
 		unsigned long now = millis();
 		////Serial.print("clocktimer = ");
 		////Serial.println(clockTimer);

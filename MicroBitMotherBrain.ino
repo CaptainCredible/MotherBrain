@@ -299,7 +299,7 @@ void loop() {
 	launchPad.read();
 	checkTimeOut(); //reset interruptPin and isSending if the microbit missed the message
 	handleKnobsAndButtons();
-
+	handleRunClockActivation();
 #endif // DEBUG
 
 }
