@@ -1,4 +1,4 @@
-//#define DEBUG
+#define DEBUG
 
 #include <EEPROM.h>
 #include <MIDI.h>
@@ -228,9 +228,9 @@ void setup()
 	UMIDI.setHandleClock(handleUsbMidiClockTicks);
 	UMIDI.setHandleContinue(USBContinue);
 	UMIDI.setHandleTimeCodeQuarterFrame(timeCodeQuarterFrame);
-
 	UMIDI.setHandleStop(handleUSBstop);
 	UMIDI.setHandleSystemReset(resetSeq);
+
 	
 
 
@@ -289,16 +289,15 @@ unsigned long dataPacket = 1;
 //uint64_t dataPacket64 = 0;
 
 void debugLoop() {
-	delay(5000);
-
-	launchPad.sendNoteOn(1, 100, 1);
-	sendTracksBuffer();
-	//send32BitInt();
-	//send64BitInt();
-	//////Serial.println("Alive");
-	delay(100);
-	launchPad.sendNoteOn(1, 0, 1);
-	checkTimeOut(); //reset interruptPin and isSending if the microbit missed the message
+	if (UMIDI.read()) {
+		byte Taip = UMIDI.getType;
+		byte StatusTaip = UMIDI.getTypeFromStatusByte;
+		Serial.print("TYPE = ");
+		Serial.println(Taip);
+		Serial.print("STYPE = ");
+		Serial.println(StatusTaip);
+	}
+	
 
 }
 
