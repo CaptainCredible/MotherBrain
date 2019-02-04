@@ -4,7 +4,11 @@
 #include <MIDI.h>
 #include <Wire.h>
 #include <I2C_Anything.h>
+#include <midi_UsbTransport.h>
 
+static const unsigned sUsbTransportBufferSize = 16;
+typedef midi::UsbTransport<sUsbTransportBufferSize> UsbTransport;
+UsbTransport sUsbTransport;
 
 #define LEDPIN 14
 #define interruptPin 16
@@ -61,6 +65,8 @@ struct MySettings : public midi::DefaultSettings                                
 
 //MIDI.CREATE_DEFAULT_INSTANCE();
 MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial1, launchPad, MySettings);
+MIDI_CREATE_INSTANCE(UsbTransport, sUsbTransport, UMIDI);
+
 
 byte scrollOffset = 0;
 bool altMidiTrack = false;
@@ -81,10 +87,6 @@ unsigned int dummySeqMatrix[256];
 byte startStep = 0;
 byte endStep = 32;
 int seqLength = 32; // temporary debug seqlength, needs to be settable by user
-//needs to lock stably, perhaps knob is not best solution
-
-
-
 byte numberOfPages = seqLength >> 3;
 
 byte oldSeqMatrix[320] = {
@@ -220,6 +222,18 @@ void setup()
 	launchPad.setHandleNoteOn(handleLPNoteOn);
 	launchPad.setHandleNoteOff(handleLPNoteOff);
 	launchPad.setHandleControlChange(handleLPCC);
+	UMIDI.setHandleNoteOn(preHandleUSBNoteOn);
+	UMIDI.setHandleNoteOff(HandleUsbNoteOff);
+	UMIDI.setHandleStart(resetSeq);
+	UMIDI.setHandleClock(handleUsbMidiClockTicks);
+	UMIDI.setHandleContinue(USBContinue);
+	UMIDI.setHandleTimeCodeQuarterFrame(timeCodeQuarterFrame);
+
+	UMIDI.setHandleStop(handleUSBstop);
+	UMIDI.setHandleSystemReset(resetSeq);
+	
+
+
 #ifdef DEBUG
 	Wire.onRequest(debugRequestEvent); // register event
 #else
@@ -294,9 +308,10 @@ void loop() {
 	debugLoop();
 #else
 	handlePageNumDisplayTimeouts();
-	usbmidiprocessing();
+//	usbmidiprocessing(); //OLD USB MIDI PROCESSING
 	handleClock();
 	launchPad.read();
+	UMIDI.read();
 	checkTimeOut(); //reset interruptPin and isSending if the microbit missed the message
 	handleKnobsAndButtons();
 	handleRunClockActivation();

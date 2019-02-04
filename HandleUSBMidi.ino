@@ -1,3 +1,6 @@
+
+//#define OLDSCHOOLUSB
+
 bool intClock = false;
 unsigned long lastMidiClockReceivedTime = 0;
 byte midiClockCounter = 5;
@@ -6,6 +9,27 @@ int USBReceiveTimeOutThresh = 3;
 unsigned long timeOutDeadline = 0;
 unsigned long prevNoteOnTime = 0;
 bool waitingForTimeOut = false;
+
+void preHandleUSBNoteOn(byte inChannel, byte inNumber, byte inVelocity) {
+	Serial.println("NoteOn");
+	if (inVelocity > 0) {
+		HandleUsbNoteOn(inNumber, inVelocity, inChannel);
+	}
+	else {
+		HandleUsbNoteOff(inNumber, inVelocity, inChannel);
+	}
+};
+
+
+
+void handleUSBstop() {
+	Serial.println("STOP");
+	midiClockRunning = false;
+	clearTopLedsArray();
+	handleTopLeds();
+}
+
+#ifdef OLDSCHOOLUSB
 
 void usbmidiprocessing() {
 	internalClockSelect = runClock;
@@ -22,25 +46,25 @@ void usbmidiprocessing() {
 		// IF NOTE ON W/ ZERO VELOCITY
 		else if ((e.type == NOTEON) && (e.m3 == 0)) {
 			//if (!internalClockSelect) {
-				HandleUsbNoteOff(e.m2, e.m3, e.m1 - 144);
+			HandleUsbNoteOff(e.m2, e.m3, e.m1 - 144);
 			//}
 		}
 		else if (e.type == TICK) {
 			//if (!internalClockSelect) {
-				handleUsbMidiClockTicks();
-				//midiClockStep();
+			handleUsbMidiClockTicks();
+			//midiClockStep();
 			//}
 			if (e.m1 == 252) {  //this is stop
-				//if (!internalClockSelect) {
-					midiClockRunning = false;
-					clearTopLedsArray();
-					handleTopLeds();
+								//if (!internalClockSelect) {
+				midiClockRunning = false;
+				clearTopLedsArray();
+				handleTopLeds();
 				//}
 			}
 		}
 		else if (e.type == RESTART) {
 			//if (!internalClockSelect) {
-				resetSeq();
+			resetSeq();
 			//}
 		}
 	}
@@ -59,8 +83,13 @@ void usbmidiprocessing() {
 }
 
 
+#endif // OLDSCHOOLUSB
+
+
+
 
 void resetSeq() {
+	Serial.println("START");
 	currentStep = -1;
 }
 
@@ -78,7 +107,6 @@ void hijackUSBMidiTrackBuffer(byte val, byte slot) {
 		clearMidiTracksBuffer();
 		bitSet(midiTracksBuffer16x8[slot], val);				//set corresponding bit in corresponding int in the buffer to be sent
 		sendUsbMidiPackage();
-
 	}
 }
 
@@ -122,9 +150,18 @@ void HandleUsbNoteOff(byte note, byte velocity, byte channel) {
 }
 
 
+void USBContinue() {
+	Serial.println("Continue");
+}
+
+void timeCodeQuarterFrame(byte receiveData) {
+	Serial.print("timeCodeQuarter = ");
+	Serial.println(receiveData);
+}
+
 void handleUsbMidiClockTicks() {
+	Serial.println("Tick");
 	runClock = false;
-	//Serial.println("turned off clock");
 	lastMidiClockReceivedTime = millis();
 	midiClockRunning = true;
 	midiClockCounter++;
