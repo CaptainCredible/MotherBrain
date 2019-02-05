@@ -30,6 +30,7 @@ UsbTransport sUsbTransport;
 #define seqLedColour 3
 #define followCol 32
 
+bool firstRun = true;
 uint16_t isMutedInt = 0b0000000000000000;
 int midiClockDiv = 6;
 bool isMuted[8] = { false, false,false, false,false, false,false, false };
@@ -259,8 +260,8 @@ void setup()
 #endif // OLDSCHOOLUSB
 
 
-	
-	
+
+
 
 
 #ifdef DEBUG
@@ -269,16 +270,11 @@ void setup()
 	Wire.onRequest(requestEvent); // register event
 #endif // DEBUG
 
-
-
-
-	clearPage();
-
 	if (!runClock) {
 		currentStep = 0;
 	}
 	//changePageMode(pageMode);
-	//delay(2000);
+	
 	if (EEPROM.read(1000) == 123) { //look for magic number that means we have stored something in EEPROM
 		digitalWrite(shiftLed, HIGH);
 		recallSeq();
@@ -287,18 +283,14 @@ void setup()
 	else {
 		//Serial.println("no seq in EEPROM");
 	}
-	//for (int i = 0; i < 8; i++) {
-	//	launchPad.sendNoteOn(vertButts[i], trackColours[i], 1);
-	//	delay(100);
-		////////Serial.println(i);
-	//}
-	//launchPad.sendNoteOff(127, 127, 10);
-	//delay(1000);
+	clearPage();
+	launchPad.sendNoteOff(127, 127, 10);
 	updatePage(0);
-	//currentPage = 0;
-	//delay(1000);
 	digitalWrite(shiftLed, LOW);
-	
+	forceUpdate = true;
+	updatePage(0);
+	firstRun = false;
+
 }
 
 
@@ -322,43 +314,38 @@ unsigned long dataPacket = 1;
 //uint64_t dataPacket64 = 0;
 
 void debugLoop() {
-//	if (UMIDI.read()) {
-		//byte Taip = UMIDI.getType;
-	//	Serial.println("POP");
-//		byte StatusTaip = UMIDI.getTypeFromStatusByte;
-//		Serial.print("STYPE = ");
-//		Serial.println(StatusTaip);
-//	}
-	
 
 }
 
 
-bool firstRun = true;
+
 
 void loop() {
 #ifdef DEBUG
 	debugLoop();
 #else
 	//handlePageNumDisplayTimeouts();
-	
+
 	handleClock();
-	
+
 	launchPad.read();
-	
+
 #ifdef OLDSCHOOLUSB
 	if (firstRun) {
 		usbmidiprocessing(); //OLD USB MIDI PROCESSING
 		firstRun = false;
 	}
-	
 #else 
-	UMIDI.read();
+		UMIDI.read();
 #endif // oldScoolMidi
 	checkTimeOut(); //reset interruptPin and isSending if the microbit missed the message
 	handleKnobsAndButtons();
 	handleRunClockActivation();
+	if (firstRun) {
+	}
+	
 #endif // DEBUG
+
 }
 
 bool numIsDisplayed = false;
