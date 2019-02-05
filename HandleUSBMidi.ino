@@ -1,5 +1,10 @@
 
-//#define OLDSCHOOLUSB
+void debugaroonie() {
+	digitalWrite(shiftLed, HIGH);
+	delay(1000);
+	digitalWrite(shiftLed, LOW);
+	delay(500);
+}
 
 bool intClock = false;
 unsigned long lastMidiClockReceivedTime = 0;
@@ -33,7 +38,9 @@ void handleUSBstop() {
 
 void usbmidiprocessing() {
 	internalClockSelect = runClock;
+	
 	while (MIDIUSB.available() > 0) {
+		
 		MIDIEvent e = MIDIUSB.read();
 		// IF NOTE ON WITH VELOCITY GREATER THAN ZERO
 		if ((e.type == NOTEON) && (e.m3 > 0)) {
@@ -50,24 +57,21 @@ void usbmidiprocessing() {
 			//}
 		}
 		else if (e.type == TICK) {
-			//if (!internalClockSelect) {
 			handleUsbMidiClockTicks();
-			//midiClockStep();
-			//}
-			if (e.m1 == 252) {  //this is stop
-								//if (!internalClockSelect) {
+			if (e.m1 == 252) {  //this is stop				
 				midiClockRunning = false;
 				clearTopLedsArray();
 				handleTopLeds();
-				//}
 			}
 		}
+		
 		else if (e.type == RESTART) {
-			//if (!internalClockSelect) {
+			
 			resetSeq();
-			//}
+			
 		}
 	}
+	
 	if (MIDIUSB.available() == 0 && hadANoteOn) {  //if there is no message but there was on prev iteration
 		timeOutDeadline = millis() + USBReceiveTimeOutThresh; //start the timer
 		hadANoteOn = false;
@@ -80,6 +84,7 @@ void usbmidiprocessing() {
 			waitingForTimeOut = false;
 		}
 	}
+	
 }
 
 

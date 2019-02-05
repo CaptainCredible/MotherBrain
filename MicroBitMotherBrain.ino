@@ -1,14 +1,23 @@
-#define DEBUG
+//#define DEBUG
+//#define OLDSCHOOLUSB
+
 
 #include <EEPROM.h>
 #include <MIDI.h>
 #include <Wire.h>
 #include <I2C_Anything.h>
-#include <midi_UsbTransport.h>
 
+#ifdef OLDSCHOOLUSB
+
+#else 
+#include <midi_UsbTransport.h>
 static const unsigned sUsbTransportBufferSize = 16;
 typedef midi::UsbTransport<sUsbTransportBufferSize> UsbTransport;
 UsbTransport sUsbTransport;
+
+#endif
+
+
 
 #define LEDPIN 14
 #define interruptPin 16
@@ -64,8 +73,15 @@ struct MySettings : public midi::DefaultSettings                                
 };
 
 //MIDI.CREATE_DEFAULT_INSTANCE();
+
 MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial1, launchPad, MySettings);
+#ifdef OLDSCHOOLUSB
+
+#else
 MIDI_CREATE_INSTANCE(UsbTransport, sUsbTransport, UMIDI);
+#endif  
+
+
 
 
 byte scrollOffset = 0;
@@ -82,7 +98,15 @@ unsigned int seqMatrix[256] = {
 0,0,0,1,0,0,0,0,	0,0,1,0,0,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,
 0,0,0,1,0,0,0,0,	0,1,1,1,1,1,1,0,	0,1,1,1,1,1,0,0,	0,0,0,0,0,1,0,0 };
 
-unsigned int dummySeqMatrix[256];
+unsigned int dummySeqMatrix[256] = {
+	0,0,0,1,0,0,0,0,	0,1,1,1,1,0,0,0,	0,1,1,1,1,1,0,0,	0,1,0,0,0,1,0,0,
+	0,0,0,1,0,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,	0,1,0,0,0,1,0,0,
+	0,0,0,1,0,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,	0,1,0,0,0,1,0,0,
+	0,0,0,1,0,0,0,0,	0,0,0,0,0,1,0,0,	0,0,1,1,1,1,0,0,	0,1,1,1,1,1,0,0,
+	0,0,0,1,0,0,0,0,	0,0,0,0,1,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,
+	0,0,0,1,0,0,0,0,	0,0,0,1,0,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,
+	0,0,0,1,0,0,0,0,	0,0,1,0,0,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,
+	0,0,0,1,0,0,0,0,	0,1,1,1,1,1,1,0,	0,1,1,1,1,1,0,0,	0,0,0,0,0,1,0,0 };
 
 byte startStep = 0;
 byte endStep = 32;
@@ -222,6 +246,8 @@ void setup()
 	launchPad.setHandleNoteOn(handleLPNoteOn);
 	launchPad.setHandleNoteOff(handleLPNoteOff);
 	launchPad.setHandleControlChange(handleLPCC);
+#ifdef OLDSCHOOLUSB
+#else
 	UMIDI.setHandleNoteOn(preHandleUSBNoteOn);
 	UMIDI.setHandleNoteOff(HandleUsbNoteOff);
 	UMIDI.setHandleStart(resetSeq);
@@ -230,7 +256,10 @@ void setup()
 	UMIDI.setHandleTimeCodeQuarterFrame(timeCodeQuarterFrame);
 	UMIDI.setHandleStop(handleUSBstop);
 	UMIDI.setHandleSystemReset(resetSeq);
+#endif // OLDSCHOOLUSB
 
+
+	
 	
 
 
@@ -249,7 +278,7 @@ void setup()
 		currentStep = 0;
 	}
 	//changePageMode(pageMode);
-	delay(2000);
+	//delay(2000);
 	if (EEPROM.read(1000) == 123) { //look for magic number that means we have stored something in EEPROM
 		digitalWrite(shiftLed, HIGH);
 		recallSeq();
@@ -264,8 +293,12 @@ void setup()
 		////////Serial.println(i);
 	//}
 	//launchPad.sendNoteOff(127, 127, 10);
+	//delay(1000);
 	updatePage(0);
+	//currentPage = 0;
+	//delay(1000);
 	digitalWrite(shiftLed, LOW);
+	
 }
 
 
@@ -289,33 +322,43 @@ unsigned long dataPacket = 1;
 //uint64_t dataPacket64 = 0;
 
 void debugLoop() {
-	if (UMIDI.read()) {
-		byte Taip = UMIDI.getType;
-		byte StatusTaip = UMIDI.getTypeFromStatusByte;
-		Serial.print("TYPE = ");
-		Serial.println(Taip);
-		Serial.print("STYPE = ");
-		Serial.println(StatusTaip);
-	}
+//	if (UMIDI.read()) {
+		//byte Taip = UMIDI.getType;
+	//	Serial.println("POP");
+//		byte StatusTaip = UMIDI.getTypeFromStatusByte;
+//		Serial.print("STYPE = ");
+//		Serial.println(StatusTaip);
+//	}
 	
 
 }
 
 
+bool firstRun = true;
+
 void loop() {
 #ifdef DEBUG
 	debugLoop();
 #else
-	handlePageNumDisplayTimeouts();
-//	usbmidiprocessing(); //OLD USB MIDI PROCESSING
+	//handlePageNumDisplayTimeouts();
+	
 	handleClock();
+	
 	launchPad.read();
+	
+#ifdef OLDSCHOOLUSB
+	if (firstRun) {
+		usbmidiprocessing(); //OLD USB MIDI PROCESSING
+		firstRun = false;
+	}
+	
+#else 
 	UMIDI.read();
+#endif // oldScoolMidi
 	checkTimeOut(); //reset interruptPin and isSending if the microbit missed the message
 	handleKnobsAndButtons();
 	handleRunClockActivation();
 #endif // DEBUG
-
 }
 
 bool numIsDisplayed = false;
