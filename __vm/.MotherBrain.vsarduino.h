@@ -18,8 +18,8 @@
 #define ARDUINO 10804
 #define ARDUINO_AVR_LEONARDO
 #define ARDUINO_ARCH_AVR
-#define USB_VID 0x2342
-#define USB_PID 0x8032
+#define USB_VID 0x1209
+#define USB_PID 0x2021
 #define __cplusplus 201103L
 #define __AVR__
 #define __inline__

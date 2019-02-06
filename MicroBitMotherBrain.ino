@@ -221,8 +221,6 @@ bool topLedWasSet[8] = { false,false,false,false, false,false,false,false, }; //
 
 void setup()
 {
-
-
 	pinMode(buttApin, INPUT_PULLUP);
 	pinMode(buttBpin, INPUT_PULLUP);
 	pinMode(buttCpin, INPUT_PULLUP);
@@ -283,8 +281,8 @@ void setup()
 	else {
 		//Serial.println("no seq in EEPROM");
 	}
+	delay(1000);
 	clearPage();
-	launchPad.sendNoteOff(127, 127, 10);
 	updatePage(0);
 	digitalWrite(shiftLed, LOW);
 	forceUpdate = true;
