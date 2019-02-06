@@ -276,10 +276,10 @@ void setup()
 	if (EEPROM.read(1000) == 123) { //look for magic number that means we have stored something in EEPROM
 		digitalWrite(shiftLed, HIGH);
 		recallSeq();
-		//Serial.println("Found seq in EEPROM, LOADED");
+		
 	}
 	else {
-		//Serial.println("no seq in EEPROM");
+		
 	}
 	delay(1000);
 	clearPage();

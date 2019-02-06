@@ -16,7 +16,6 @@ unsigned long prevNoteOnTime = 0;
 bool waitingForTimeOut = false;
 
 void preHandleUSBNoteOn(byte inChannel, byte inNumber, byte inVelocity) {
-	Serial.println("NoteOn");
 	if (inVelocity > 0) {
 		HandleUsbNoteOn(inNumber, inVelocity, inChannel);
 	}
@@ -28,7 +27,6 @@ void preHandleUSBNoteOn(byte inChannel, byte inNumber, byte inVelocity) {
 
 
 void handleUSBstop() {
-	Serial.println("STOP");
 	midiClockRunning = false;
 	clearTopLedsArray();
 	handleTopLeds();
@@ -94,17 +92,12 @@ void usbmidiprocessing() {
 
 
 void resetSeq() {
-	Serial.println("START");
 	currentStep = -1;
 }
 
 void debugInt(unsigned int valToPrint) {
-	////Serial.print("channel 7 =");
-	////Serial.println(valToPrint >> 8);
-	////Serial.print("channel 8 =");
-	////Serial.println(valToPrint & 0b0000000011111111);
-	////Serial.println(valToPrint, BIN);
-	////Serial.println();
+
+
 }
 
 void hijackUSBMidiTrackBuffer(byte val, byte slot) {
@@ -116,10 +109,6 @@ void hijackUSBMidiTrackBuffer(byte val, byte slot) {
 }
 
 void HandleUsbNoteOn(byte note, byte velocity, byte channel) {
-	////Serial.print("channel = ");
-	////Serial.println(channel);
-	////Serial.print("isPoly = ");
-	////Serial.println(isPoly[channel]);
 	if (channel < 9) {
 		prevNoteOnTime = millis();
 		hadANoteOn = true;
@@ -130,18 +119,11 @@ void HandleUsbNoteOn(byte note, byte velocity, byte channel) {
 		}
 		else { //if this midi channel is controlling a monophonic (127 note) orchestra channel
 		   //determine witch bits we are using
-			
-			////Serial.print("write to channel");
-			////Serial.println(channel);
 			if (channel == 6 || channel == 8) { //these are high bits on ints 6 and 7 in the buffer 
-				////Serial.print("MSB  ");
-				////Serial.println(note);
 				midiTracksBuffer16x8[channel-1] = midiTracksBuffer16x8[channel-1] & 0b0000000011111111; // use bitmask to clear any previous values held in the most significant bits, leaving LSB alone
 				midiTracksBuffer16x8[channel-1] = midiTracksBuffer16x8[channel-1] | (note << 8);         //shift note value left by 8 and compound (logical or) it to the rest
 			}
 			else if (channel == 7 || channel == 9) { //if it is tracks 8 or 10 they are the least significant bits
-				////Serial.println("LSB");
-				////Serial.println();
 				midiTracksBuffer16x8[channel] = midiTracksBuffer16x8[channel] & 0b1111111100000000; // use bitmask to clear any previous values held in the least significant bits, leaving MSB alone
 				midiTracksBuffer16x8[channel] = midiTracksBuffer16x8[channel] | note;         // compound (logical or) the int in the buffer with the note we want to add 
 			} 
@@ -156,16 +138,14 @@ void HandleUsbNoteOff(byte note, byte velocity, byte channel) {
 
 
 void USBContinue() {
-	Serial.println("Continue");
+	
 }
 
 void timeCodeQuarterFrame(byte receiveData) {
-	Serial.print("timeCodeQuarter = ");
-	Serial.println(receiveData);
+	
 }
 
 void handleUsbMidiClockTicks() {
-	Serial.println("Tick");
 	runClock = false;
 	lastMidiClockReceivedTime = millis();
 	midiClockRunning = true;

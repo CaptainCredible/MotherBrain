@@ -1,8 +1,5 @@
 void handleRunClockActivation() {
-	//Serial.print("midiclock ");
-	//Serial.print(midiClockRunning);
-	//Serial.print("  runClock ");
-	//Serial.println(runClock);
+
 
 	if (midiClockRunning) { //if intClock is off
 		if (millis() - lastMidiClockReceivedTime > 2000) { // if its been more than 3 sec since we received a midiclock
@@ -62,10 +59,7 @@ void midiClockStep() {
 void handleClock() {
 	if (runClock && !midiClockRunning) {
 		unsigned long now = millis();
-		////Serial.print("clocktimer = ");
-		////Serial.println(clockTimer);
-		////Serial.print("        Now = ");
-		////Serial.println(now);
+
 		if (now >= clockTimer + stepDuration) {
 			int diff = now - (clockTimer + stepDuration); // find out if we overshot so we can avoid drifting and instead have just a spot of jitter
 			if (diff > 5 || diff < 0) {									//avoid adjusting for diff when there are other delays causing problems
@@ -81,16 +75,12 @@ void handleClock() {
 				currentStep = startStep;
 			}
 			handleTimeSig();
-			//currentStep = currentStep % endStep;
-			//currentStep = currentStep % seqLength;
 			if (currentStep >> 3 != currentPageThatIsPlaying) {
 				previousPageThatWasPlaying = currentPageThatIsPlaying;
 				currentPageThatIsPlaying = currentStep >> 3;
 			}
 			handleStep();
 			updatePage(pageMode);
-			////Serial.print("diff = ");
-			////Serial.println(diff);
 		}
 	}
 }
@@ -165,31 +155,29 @@ void storeSeqAlt() {
 	for (int i = 0; i < 256; i++) {
 		int writeCursor = i * 2;
 		uint16_t MSB = seqMatrix[i] >> 8;
-		//Serial.print("w MSB ");
-		//Serial.print(MSB);
+		
 		EEPROM.write(writeCursor, MSB);
 		uint16_t readMSB = EEPROM.read(writeCursor);
-		//Serial.print("  r MSB ");
-		//Serial.print(readMSB);
+		
 		if (MSB != readMSB) {
-			//Serial.print(" ERROR!!!!");
+		
 		}
-		//Serial.println();
+		
 
 	}
 	for (int i = 1; i < 257; i++) {
 		int writeCursor = i * 2;
 		uint16_t LSB = seqMatrix[i] & 0b0000000011111111;
-		//Serial.print("w LSB ");
-		//Serial.print(LSB);
+		
+		
 		EEPROM.write(writeCursor, LSB);
 		uint16_t readLSB = EEPROM.read(writeCursor);
-		//Serial.print("  r LSB ");
-		//Serial.print(readLSB);
+		
+		
 		if (LSB != readLSB) {
-			//Serial.print(" ERROR!!!!");
+		
 		}
-		//Serial.println();
+		
 
 	}
 	EEPROM.write(1000, 0);
@@ -204,17 +192,13 @@ void storeSeq() {
 		int writeCursor = i * 2;
 	
 		EEPROM.write(writeCursor, MSB);
-		//Serial.print("w MSB ");
-		//Serial.print(MSB);
-		//Serial.print("   r MSB ");
+		
 		byte MSBread = EEPROM.read(writeCursor);
-		//Serial.print(MSBread);
+		
 		EEPROM.write(writeCursor + 1, LSB);
-		//Serial.print("    w LSB ");
-		//Serial.print(MSB);
-		//Serial.print("   r LSB ");
+		
 		byte LSBread = EEPROM.read(writeCursor + 1);
-		//Serial.print(LSBread);
+		
 		if (LSB != LSBread) {
 			//Serial.print(" LSB MISMATCH!!!   ");
 		}
@@ -222,12 +206,12 @@ void storeSeq() {
 			//Serial.print(" MSB MISMATCH!!!   ");
 		}
 
-		//Serial.println();
+		
 	}
 	for (int i = 0; i < 8; i++) {
 		launchPad.sendNoteOn(vertButts[i], trackColours[i], 1);
 		delay(100);
-		////////Serial.println(i);
+		
 	}
 	EEPROM.write(1000, 123);
 	//Serial.println("wrote 123");
