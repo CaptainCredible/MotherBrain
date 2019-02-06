@@ -1,9 +1,22 @@
 //#define DEBUG
+//#define OLDSCHOOLUSB
+
 
 #include <EEPROM.h>
 #include <MIDI.h>
 #include <Wire.h>
 #include <I2C_Anything.h>
+
+#ifdef OLDSCHOOLUSB
+
+#else 
+#include <midi_UsbTransport.h>
+static const unsigned sUsbTransportBufferSize = 16;
+typedef midi::UsbTransport<sUsbTransportBufferSize> UsbTransport;
+UsbTransport sUsbTransport;
+
+#endif
+
 
 
 #define LEDPIN 14
@@ -17,6 +30,7 @@
 #define seqLedColour 3
 #define followCol 32
 
+bool firstRun = true;
 uint16_t isMutedInt = 0b0000000000000000;
 int midiClockDiv = 6;
 bool isMuted[8] = { false, false,false, false,false, false,false, false };
@@ -60,7 +74,16 @@ struct MySettings : public midi::DefaultSettings                                
 };
 
 //MIDI.CREATE_DEFAULT_INSTANCE();
+
 MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial1, launchPad, MySettings);
+#ifdef OLDSCHOOLUSB
+
+#else
+MIDI_CREATE_INSTANCE(UsbTransport, sUsbTransport, UMIDI);
+#endif  
+
+
+
 
 byte scrollOffset = 0;
 bool altMidiTrack = false;
@@ -76,15 +99,19 @@ unsigned int seqMatrix[256] = {
 0,0,0,1,0,0,0,0,	0,0,1,0,0,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,
 0,0,0,1,0,0,0,0,	0,1,1,1,1,1,1,0,	0,1,1,1,1,1,0,0,	0,0,0,0,0,1,0,0 };
 
-unsigned int dummySeqMatrix[256];
+unsigned int dummySeqMatrix[256] = {
+	0,0,0,1,0,0,0,0,	0,1,1,1,1,0,0,0,	0,1,1,1,1,1,0,0,	0,1,0,0,0,1,0,0,
+	0,0,0,1,0,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,	0,1,0,0,0,1,0,0,
+	0,0,0,1,0,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,	0,1,0,0,0,1,0,0,
+	0,0,0,1,0,0,0,0,	0,0,0,0,0,1,0,0,	0,0,1,1,1,1,0,0,	0,1,1,1,1,1,0,0,
+	0,0,0,1,0,0,0,0,	0,0,0,0,1,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,
+	0,0,0,1,0,0,0,0,	0,0,0,1,0,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,
+	0,0,0,1,0,0,0,0,	0,0,1,0,0,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,
+	0,0,0,1,0,0,0,0,	0,1,1,1,1,1,1,0,	0,1,1,1,1,1,0,0,	0,0,0,0,0,1,0,0 };
 
 byte startStep = 0;
 byte endStep = 32;
 int seqLength = 32; // temporary debug seqlength, needs to be settable by user
-//needs to lock stably, perhaps knob is not best solution
-
-
-
 byte numberOfPages = seqLength >> 3;
 
 byte oldSeqMatrix[320] = {
@@ -194,8 +221,6 @@ bool topLedWasSet[8] = { false,false,false,false, false,false,false,false, }; //
 
 void setup()
 {
-
-
 	pinMode(buttApin, INPUT_PULLUP);
 	pinMode(buttBpin, INPUT_PULLUP);
 	pinMode(buttCpin, INPUT_PULLUP);
@@ -220,22 +245,34 @@ void setup()
 	launchPad.setHandleNoteOn(handleLPNoteOn);
 	launchPad.setHandleNoteOff(handleLPNoteOff);
 	launchPad.setHandleControlChange(handleLPCC);
+#ifdef OLDSCHOOLUSB
+#else
+	UMIDI.setHandleNoteOn(preHandleUSBNoteOn);
+	UMIDI.setHandleNoteOff(HandleUsbNoteOff);
+	UMIDI.setHandleStart(resetSeq);
+	UMIDI.setHandleClock(handleUsbMidiClockTicks);
+	UMIDI.setHandleContinue(USBContinue);
+	UMIDI.setHandleTimeCodeQuarterFrame(timeCodeQuarterFrame);
+	UMIDI.setHandleStop(handleUSBstop);
+	UMIDI.setHandleSystemReset(resetSeq);
+#endif // OLDSCHOOLUSB
+
+
+
+
+
+
 #ifdef DEBUG
 	Wire.onRequest(debugRequestEvent); // register event
 #else
 	Wire.onRequest(requestEvent); // register event
 #endif // DEBUG
 
-
-
-
-	clearPage();
-
 	if (!runClock) {
 		currentStep = 0;
 	}
 	//changePageMode(pageMode);
-	delay(2000);
+	
 	if (EEPROM.read(1000) == 123) { //look for magic number that means we have stored something in EEPROM
 		digitalWrite(shiftLed, HIGH);
 		recallSeq();
@@ -244,14 +281,14 @@ void setup()
 	else {
 		//Serial.println("no seq in EEPROM");
 	}
-	//for (int i = 0; i < 8; i++) {
-	//	launchPad.sendNoteOn(vertButts[i], trackColours[i], 1);
-	//	delay(100);
-		////////Serial.println(i);
-	//}
-	//launchPad.sendNoteOff(127, 127, 10);
+	delay(1000);
+	clearPage();
 	updatePage(0);
 	digitalWrite(shiftLed, LOW);
+	forceUpdate = true;
+	updatePage(0);
+	firstRun = false;
+
 }
 
 
@@ -275,31 +312,36 @@ unsigned long dataPacket = 1;
 //uint64_t dataPacket64 = 0;
 
 void debugLoop() {
-	delay(5000);
-
-	launchPad.sendNoteOn(1, 100, 1);
-	sendTracksBuffer();
-	//send32BitInt();
-	//send64BitInt();
-	//////Serial.println("Alive");
-	delay(100);
-	launchPad.sendNoteOn(1, 0, 1);
-	checkTimeOut(); //reset interruptPin and isSending if the microbit missed the message
 
 }
+
+
 
 
 void loop() {
 #ifdef DEBUG
 	debugLoop();
 #else
-	handlePageNumDisplayTimeouts();
-	usbmidiprocessing();
+	//handlePageNumDisplayTimeouts();
+
 	handleClock();
+
 	launchPad.read();
+
+#ifdef OLDSCHOOLUSB
+	if (firstRun) {
+		usbmidiprocessing(); //OLD USB MIDI PROCESSING
+		firstRun = false;
+	}
+#else 
+		UMIDI.read();
+#endif // oldScoolMidi
 	checkTimeOut(); //reset interruptPin and isSending if the microbit missed the message
 	handleKnobsAndButtons();
 	handleRunClockActivation();
+	if (firstRun) {
+	}
+	
 #endif // DEBUG
 
 }

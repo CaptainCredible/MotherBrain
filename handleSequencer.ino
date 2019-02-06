@@ -1,8 +1,8 @@
 void handleRunClockActivation() {
-	Serial.print("midiclock ");
-	Serial.print(midiClockRunning);
-	Serial.print("  runClock ");
-	Serial.println(runClock);
+	//Serial.print("midiclock ");
+	//Serial.print(midiClockRunning);
+	//Serial.print("  runClock ");
+	//Serial.println(runClock);
 
 	if (midiClockRunning) { //if intClock is off
 		if (millis() - lastMidiClockReceivedTime > 2000) { // if its been more than 3 sec since we received a midiclock
