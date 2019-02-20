@@ -108,15 +108,15 @@ void HandleUsbNoteOn(byte note, byte velocity, byte channel) {
 	if (channel < 9) {
 		timeOutDeadline = millis() + USBReceiveTimeOutThresh; //start the timer
 		waitingForTimeOut = true;
-		Serial.print("MIDI CHANNEL ");
-		Serial.println(channel);
+		//Serial.print("MIDI CHANNEL ");
+		//Serial.println(channel);
 		prevNoteOnTime = millis();
 		hadANoteOn = true;
-		Serial.println(note);
+		//Serial.println(note);
 		if (isPoly[channel]) { // if this midi channel corresponds to a polyphonic orchestra channel
 			if (note < 16) {												//make syre we dont overflow
 				bitSet(midiTracksBuffer16x8[channel], note);				//set corresponding bit in corresponding int in the buffer to be sent
-				Serial.println("POLY CHANNEL");
+		//		Serial.println("POLY CHANNEL");
 			}
 		}
 		else { //if this midi channel is controlling a monophonic (127 note) orchestra channel
