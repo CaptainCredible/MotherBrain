@@ -30,6 +30,15 @@ UsbTransport sUsbTransport;
 #define seqLedColour 3
 #define followCol 32
 
+unsigned long timeOutDeadline = 0;
+bool intClock = false;
+unsigned long lastMidiClockReceivedTime = 0;
+byte midiClockCounter = 5;
+bool hadANoteOn = false;
+int USBReceiveTimeOutThresh = 3;
+unsigned long prevNoteOnTime = 0;
+bool waitingForTimeOut = false;
+
 bool firstRun = true;
 uint16_t isMutedInt = 0b0000000000000000;
 int midiClockDiv = 6;
@@ -335,6 +344,12 @@ void loop() {
 	}
 #else 
 		UMIDI.read();
+		if (waitingForTimeOut) { //if we are waiting to see if there are any more messages for this step
+			if (millis() > timeOutDeadline) { //if we timed out
+				sendUsbMidiPackage();
+				waitingForTimeOut = false;
+			}
+		}
 #endif // oldScoolMidi
 	checkTimeOut(); //reset interruptPin and isSending if the microbit missed the message
 	handleKnobsAndButtons();
