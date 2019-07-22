@@ -122,7 +122,8 @@ void HandleUsbNoteOn(byte note, byte velocity, byte channel) {
 		}
 		else { //if this midi channel is controlling a monophonic (127 note) orchestra channel
 		   //determine witch bits we are using
-			if (channel == 6 || channel == 8) { //these are high bits on ints 6 and 7 in the buffer 
+			if (channel == 6 || channel == 8) { //these are high bits on ints 6 and 7 in the buffer    // HERE IS THE ERROR!!!!?
+
 				midiTracksBuffer16x8[channel-1] = midiTracksBuffer16x8[channel-1] & 0b0000000011111111; // use bitmask to clear any previous values held in the most significant bits, leaving LSB alone
 				midiTracksBuffer16x8[channel-1] = midiTracksBuffer16x8[channel-1] | (note << 8);         //shift note value left by 8 and compound (logical or) it to the rest
 			}
