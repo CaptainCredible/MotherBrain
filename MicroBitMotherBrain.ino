@@ -264,6 +264,7 @@ void setup()
 	UMIDI.setHandleTimeCodeQuarterFrame(timeCodeQuarterFrame);
 	UMIDI.setHandleStop(handleUSBstop);
 	UMIDI.setHandleSystemReset(resetSeq);
+	UMIDI.turnThruOff();
 #endif // OLDSCHOOLUSB
 
 
