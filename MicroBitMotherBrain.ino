@@ -1,5 +1,5 @@
 //#define DEBUG
-//#define OLDSCHOOLUSB
+#define OLDSCHOOLUSB
 
 
 #include <EEPROM.h>
@@ -8,7 +8,7 @@
 #include <I2C_Anything.h>
 
 #ifdef OLDSCHOOLUSB
-
+//#include <MIDIUSB.h>
 #else 
 #include <midi_UsbTransport.h>
 static const unsigned sUsbTransportBufferSize = 16;
@@ -35,7 +35,7 @@ bool intClock = false;
 unsigned long lastMidiClockReceivedTime = 0;
 byte midiClockCounter = 5;
 bool hadANoteOn = false;
-int USBReceiveTimeOutThresh = 3;
+int USBReceiveTimeOutThresh = 4;
 unsigned long prevNoteOnTime = 0;
 bool waitingForTimeOut = false;
 
@@ -343,6 +343,8 @@ void loop() {
 		usbmidiprocessing(); //OLD USB MIDI PROCESSING
 		firstRun = false;
 	}
+	usbmidiprocessing(); //OLD USB MIDI PROCESSING
+
 #else 
 		UMIDI.read();
 		if (waitingForTimeOut) { //if we are waiting to see if there are any more messages for this step

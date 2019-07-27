@@ -11,7 +11,7 @@ void debugaroonie() {
 
 
 void preHandleUSBNoteOn(byte inChannel, byte inNumber, byte inVelocity) {
-	//Serial.println("MIDI");
+	////Serial.println("MIDI");
 	if (inVelocity > 0) {
 		HandleUsbNoteOn(inNumber, inVelocity, inChannel);
 	}
@@ -34,7 +34,7 @@ void usbmidiprocessing() {
 	internalClockSelect = runClock;
 	
 	while (MIDIUSB.available() > 0) {
-		
+		//Serial.println("PING");
 		MIDIEvent e = MIDIUSB.read();
 		// IF NOTE ON WITH VELOCITY GREATER THAN ZERO
 		if ((e.type == NOTEON) && (e.m3 > 0)) {
@@ -105,6 +105,7 @@ void hijackUSBMidiTrackBuffer(byte val, byte slot) {
 }
 
 void HandleUsbNoteOn(byte note, byte velocity, byte channel) {
+	//Serial.println("PONG");
 	if (channel < 9) {
 		timeOutDeadline = millis() + USBReceiveTimeOutThresh; //start the timer
 		waitingForTimeOut = true;
@@ -112,24 +113,27 @@ void HandleUsbNoteOn(byte note, byte velocity, byte channel) {
 		//Serial.println(channel);
 		prevNoteOnTime = millis();
 		hadANoteOn = true;
-		//Serial.println(note);
+		////Serial.println(note);
 		if (isPoly[channel]) { // if this midi channel corresponds to a polyphonic orchestra channel
 			if (note < 16) {												//make syre we dont overflow
-				bitSet(midiTracksBuffer16x8[channel-1], note);				//set corresponding bit in corresponding int in the buffer to be sent
+				bitSet(midiTracksBuffer16x8[channel], note);				//set corresponding bit in corresponding int in the buffer to be sent
 				//Serial.println(channel);
 				//Serial.println("POLY CHANNEL");
 			}
 		}
 		else { //if this midi channel is controlling a monophonic (127 note) orchestra channel
 		   //determine witch bits we are using
+			//Serial.println(channel);
+			//Serial.println("MONO CHANNEL");
+
 			if (channel == 6 || channel == 8) { //these are high bits on ints 6 and 7 in the buffer    // HERE IS THE ERROR!!!!?
 
-				midiTracksBuffer16x8[channel-1] = midiTracksBuffer16x8[channel-1] & 0b0000000011111111; // use bitmask to clear any previous values held in the most significant bits, leaving LSB alone
-				midiTracksBuffer16x8[channel-1] = midiTracksBuffer16x8[channel-1] | (note << 8);         //shift note value left by 8 and compound (logical or) it to the rest
+				midiTracksBuffer16x8[channel] = midiTracksBuffer16x8[channel] & 0b0000000011111111; // use bitmask to clear any previous values held in the most significant bits, leaving LSB alone
+				midiTracksBuffer16x8[channel] = midiTracksBuffer16x8[channel] | (note << 8);         //shift note value left by 8 and compound (logical or) it to the rest
 			}
 			else if (channel == 7 || channel == 9) { //if it is tracks 8 or 10 they are the least significant bits
-				midiTracksBuffer16x8[channel-1] = midiTracksBuffer16x8[channel-1] & 0b1111111100000000; // use bitmask to clear any previous values held in the least significant bits, leaving MSB alone
-				midiTracksBuffer16x8[channel-1] = midiTracksBuffer16x8[channel-1] | note;         // compound (logical or) the int in the buffer with the note we want to add 
+				midiTracksBuffer16x8[channel] = midiTracksBuffer16x8[channel] & 0b1111111100000000; // use bitmask to clear any previous values held in the least significant bits, leaving MSB alone
+				midiTracksBuffer16x8[channel] = midiTracksBuffer16x8[channel] | note;         // compound (logical or) the int in the buffer with the note we want to add 
 			} 
 			debugInt(midiTracksBuffer16x8[7]);
 		}
