@@ -406,7 +406,11 @@ void handleKnobsAndButtons() {
 		else {
 			currentStep = -1;
 			clockTimer = -1;
-			updatePage(pageMode);
+			midiClockCounter = -1;
+		//	clearTopLedsArray();
+		//	handleTopLeds();
+
+			//updatePage(pageMode);
 		}
 	}
 
