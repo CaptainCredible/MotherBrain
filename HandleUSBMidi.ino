@@ -109,8 +109,8 @@ void HandleUsbNoteOn(byte note, byte velocity, byte channel) {
 	if (channel < 9) {
 		timeOutDeadline = millis() + USBReceiveTimeOutThresh; //start the timer
 		waitingForTimeOut = true;
-		Serial.print("MIDI CHANNEL ");
-		Serial.println(channel);
+		//Serial.print("MIDI CHANNEL ");
+		//Serial.println(channel);
 		prevNoteOnTime = millis();
 		hadANoteOn = true;
 		////Serial.println(note);
@@ -130,17 +130,17 @@ void HandleUsbNoteOn(byte note, byte velocity, byte channel) {
 			if (channel == 8) { //these are high bits on ints 6 and 7 in the buffer    // HERE IS THE ERROR!!!!?
 
 				midiTracksBuffer16x8[channel-1] = midiTracksBuffer16x8[channel-1] & 0b0000000011111111; // use bitmask to clear any previous values held in the most significant bits, leaving LSB alone
-				Serial.print("cleared = ");
-				Serial.println(midiTracksBuffer16x8[channel], BIN);
+				//Serial.print("cleared = ");
+			//	Serial.println(midiTracksBuffer16x8[channel], BIN);
 				midiTracksBuffer16x8[channel-1] = midiTracksBuffer16x8[channel-1] | (note << 8);         //shift note value left by 8 and compound (logical or) it to the rest
-				Serial.print("8 = ");
-				Serial.println(midiTracksBuffer16x8[channel], BIN);
+				//Serial.print("8 = ");
+				//Serial.println(midiTracksBuffer16x8[channel], BIN);
 			}
 			else if (channel == 7) { //if it is tracks 8 or 10 they are the least significant bits
 				midiTracksBuffer16x8[channel] = midiTracksBuffer16x8[channel] & 0b1111111100000000; // use bitmask to clear any previous values held in the least significant bits, leaving MSB alone
 				midiTracksBuffer16x8[channel] = midiTracksBuffer16x8[channel] | note;         // compound (logical or) the int in the buffer with the note we want to add 
-				Serial.print("7 = ");
-				Serial.println(midiTracksBuffer16x8[channel], BIN);
+				//Serial.print("7 = ");
+				//Serial.println(midiTracksBuffer16x8[channel], BIN);
 			} 
 			//debugInt(midiTracksBuffer16x8[7]);
 		}
