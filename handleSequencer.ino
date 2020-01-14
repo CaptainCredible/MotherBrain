@@ -1,6 +1,4 @@
 void handleRunClockActivation() {
-
-
 	if (midiClockRunning) { //if intClock is off
 		if (millis() - lastMidiClockReceivedTime > 2000) { // if its been more than 3 sec since we received a midiclock
 			midiClockRunning = false;
@@ -9,33 +7,53 @@ void handleRunClockActivation() {
 }
 
 void handleTimeSig() {
-	if (currentStep % 8 >= 8 - timeSig) {
-		currentStep += timeSig;
+	if (timeSig == 2) {
+		if (masterStep % 4 == 2) {
+			masterStep += 1;
+		}
 	}
+	else {
+		if (masterStep % 8 >= 7 - timeSig) {
+			masterStep += timeSig;
+		}
+	}
+	
 }
 
 void calculateStartAndEndStep() {
 	startStep = desiredStartStep;
+	polyStartStep[0] = startStep;
 	if (desiredStartStep >= desiredEndStep) {
 		endStep = startStep + 8;
 	}
 	else {
 		endStep = desiredEndStep;
+
 	}
-	/*
-	//Serial.print("desiredStartStep = ");
-	//Serial.print(desiredStartStep);
-	//Serial.print("   desiredEndStep = ");
-	//Serial.println(desiredEndStep);
-
-	//Serial.print("actualStartStep = ");
-	//Serial.print(startStep);
-	//Serial.print("   actualEndStep = ");
-	//Serial.println(endStep);
-	*/
-
-
+	polyEndStep[0] = endStep;
+	if (polyRhythm) {
+		for (int i = 1; i < 9; i++) { //dont calculate for i = 0 cos thats the common currentStep
+			polyStartStep[i] = desiredPolyStartStep[i];
+			if (desiredPolyStartStep[i] >= desiredPolyEndStep[i]) {
+				polyEndStep[i] = polyStartStep[i] + 8;
+			}
+			else {
+				polyEndStep[i] = desiredPolyEndStep[i];
+			}
+		}
+	}
+	
 }
+void calculateSeqLengths(){
+	seqLength = endStep - startStep;
+	if (polyRhythm) {
+		for (int i = 0; i < 9; i++) {
+			polySeqLength[i] = polyEndStep[i] - polyStartStep[i];
+		}
+	}
+	
+}
+
 
 void midiClockStep() {
 	//runClock = false; //turn off internal clock
@@ -51,43 +69,108 @@ void midiClockStep() {
 		currentPageThatIsPlaying = currentStep >> 3;
 	}
 	handleStep();
-	updatePage(pageMode);
+	updatePage(selectedTrack);
 	
 }
+
+
 
 
 void handleClock() {
 	if (runClock && !midiClockRunning) {
 		unsigned long now = millis();
+		int compare = stepDuration;
 
-		if (now >= clockTimer + stepDuration) {
-			int diff = now - (clockTimer + stepDuration); // find out if we overshot so we can avoid drifting and instead have just a spot of jitter
+		/*
+		if (timeSig == 2) {
+			compare = tripletStepDuration;  // code to adapt tempo to triplets (needs tweeking to wait for next page? before changing timesig)
+		}
+		*/
+
+		if (now >= clockTimer + compare) {   // TIME TO INCREMENT STEP
+			int diff = now - (clockTimer + compare); // find out if we overshot so we can avoid drifting and instead have just a spot of jitter
 			if (diff > 5 || diff < 0) {									//avoid adjusting for diff when there are other delays causing problems
 				diff = 0;
 			}
 			clockTimer = now - diff;					  //Set clocktimer to what it should have been
 			lastStep = currentStep;
-			currentStep++;
-
-			calculateStartAndEndStep();
-
+			masterStep++;
+			calculateStartAndEndStep();   //make sure endstep isnt before startstep
+			calculateSeqLengths();
+			currentStep = (masterStep%seqLength) + startStep;
+			handleTimeSig();
 			if (currentStep >= endStep) {
 				currentStep = startStep;
 			}
-			handleTimeSig();
-			if (currentStep >> 3 != currentPageThatIsPlaying) {
-				previousPageThatWasPlaying = currentPageThatIsPlaying;
-				currentPageThatIsPlaying = currentStep >> 3;
+			polyCurrentStep[0] = currentStep;
+			//calculate current steps for polyRhythm tracks
+			if (globalPolyRhythmEnable) {
+				for (byte i = 1; i < 9; i++) {
+					if (polyRhythm[i]) {
+						
+						byte moduloSeqLength = (masterStep % polySeqLength[i]);
+						Serial.print("polySeqLength[i] = ");
+						Serial.println(polySeqLength[i]);
+						Serial.println();
+						//Serial.println(moduloSeqLength);
+						//Serial.print("moduloSeqLength = ");
+						//Serial.println(moduloSeqLength);
+						polyCurrentStep[i] = (masterStep % polySeqLength[i]) + polyStartStep[i];
+						if (polyCurrentStep[i] >= polyEndStep[i]) {
+							//Serial.println("CLIPPED");
+							polyCurrentStep[i] = polyStartStep[i];
+						}
+						Serial.print(i);
+						Serial.print(" IS POLYRHYTHM at step");
+						Serial.println(polyCurrentStep[i]);
+					}
+					else { // if this track wants to follow common currentStep
+						polyCurrentStep[i] = currentStep;
+					}
+				}
 			}
+
+			// CODE TO TELL IF WE NEED TO update currentpage indicator led at top
+			if (!globalPolyRhythmEnable | (selectedTrack!=0)) {
+				if (currentStep >> 3 != currentPageThatIsPlaying) {
+					previousPageThatWasPlaying = currentPageThatIsPlaying;
+					currentPageThatIsPlaying = currentStep >> 3;
+				}
+			}
+			else {
+				if (polyCurrentStep[selectedTrack] >> 3 != currentPageThatIsPlaying) {
+					previousPageThatWasPlaying = currentPageThatIsPlaying;
+					currentPageThatIsPlaying = polyCurrentStep[selectedTrack] >> 3;
+				}
+			}
+
 			handleStep();
-			updatePage(pageMode);
+			updatePage(selectedTrack);
 		}
 	}
 }
 
 void handleStep() {
+	Serial.print("masterStep = ");
+	Serial.println(masterStep);
+	Serial.print("currentStep = ");
+	Serial.println(currentStep);
+	Serial.print("polyCurrentStep for track ");
+	Serial.print(selectedTrack);
+	Serial.print(" = ");
+	Serial.println(polyCurrentStep[selectedTrack]);
+
+	//Serial.println(numberOfPages);
+	
 	for (byte track = 0; track < numberOfTracks; track++) {					//repeat for every track 0-15
-		int matrixCursor = currentStep + (track * matrixTrackOffset);			//check current step for notes
+		int matrixCursor = 0;
+			if ((polyRhythm[track + 1]) && globalPolyRhythmEnable) {
+				matrixCursor = polyCurrentStep[track+1] + (track * matrixTrackOffset);			//check current step for notes
+			}
+			else {
+				matrixCursor = currentStep + (track * matrixTrackOffset);			//check current step for notes
+			}
+		 
 		//if (isMuted[track]) {
 		if (bitRead(isMutedInt, track)) {
 			tracksBuffer16x8[track] = 0;
@@ -168,17 +251,10 @@ void storeSeqAlt() {
 	for (int i = 1; i < 257; i++) {
 		int writeCursor = i * 2;
 		uint16_t LSB = seqMatrix[i] & 0b0000000011111111;
-		
-		
 		EEPROM.write(writeCursor, LSB);
 		uint16_t readLSB = EEPROM.read(writeCursor);
-		
-		
 		if (LSB != readLSB) {
-		
 		}
-		
-
 	}
 	EEPROM.write(1000, 0);
 }

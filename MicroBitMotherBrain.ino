@@ -25,10 +25,34 @@ UsbTransport sUsbTransport;
 #define ZamLed 15
 #define followLed 14
 #define followSwitch A2
-#define shiftLed A0
+#define polyRhythmLed A0
 
 #define seqLedColour 3
 #define followCol 32
+
+unsigned long masterStep = 0;
+
+bool polyRhythm[9] = { false, false, false, false, false, false, false, false, false };
+bool globalPolyRhythmEnable = polyRhythm[0];
+
+int desiredPolyEndStep[9] = { 32,32,32,32,32,32,32,32,32 };
+int desiredPolyStartStep[9] = { 0,0,0,0,0,0,0,0,0 };
+int polyEndStep[9] = { 32,32,32,32,32,32,32,32,32 };
+int polyStartStep[9] = { 0,0,0,0,0,0,0,0,0 };
+int polyCurrentStep[9] = {-1,-1,-1,-1,-1,-1,-1,-1,-1};
+
+int polySeqLength[9] = { 32,32,32,32,32,32,32,32,32 };
+
+int desiredEndStep = 32;
+int desiredStartStep = 0;
+int startStep = 0;
+int endStep = 32;
+
+int seqLength = endStep-startStep; // temporary debug seqlength, needs to be settable by user
+
+
+
+
 
 unsigned long timeOutDeadline = 0;
 bool intClock = false;
@@ -55,8 +79,6 @@ const byte NOTEOFF = 0x08;
 const byte MCLOCKTICK = 0x03;
 byte timeSig = 0; // 0 = 4/4, 1 = 7/8, 2 = 3/3, 3 = 5/8
 byte oldTimeSig = -1;
-byte desiredEndStep = 32;
-byte desiredStartStep = 0;
 
 const byte pageDisplayCol = 16;
 
@@ -118,10 +140,9 @@ unsigned int dummySeqMatrix[256] = {
 	0,0,0,1,0,0,0,0,	0,0,1,0,0,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,
 	0,0,0,1,0,0,0,0,	0,1,1,1,1,1,1,0,	0,1,1,1,1,1,0,0,	0,0,0,0,0,1,0,0 };
 
-byte startStep = 0;
-byte endStep = 32;
-int seqLength = 32; // temporary debug seqlength, needs to be settable by user
-byte numberOfPages = seqLength >> 3;
+
+
+byte numberOfPages = 4;
 
 byte oldSeqMatrix[320] = {
 	1,2,3,4,5,0,0,0,	1,0,0,0,0,0,1,0,	127,127,127,127,
@@ -206,11 +227,14 @@ byte vertButts[8] = { 8,24,40,56,72,88,104,120 };
 
 unsigned long clockTimer = 0;
 int stepDuration = 125;
+int tripletStepDuration = (stepDuration * 4) / 3;
 int lastStep = 200;
 int currentStep = -1;
 bool isSending = false;
 
-byte pageMode = 0; // 0 = overview, 1 = track one 2 = track2 and so forth
+
+
+byte selectedTrack = 0; // 0 = overview, 1 = track one 2 = track2 and so forth
 
 const byte buttApin = 8;
 const byte buttBpin = 9;
@@ -242,7 +266,7 @@ void setup()
 	pinMode(interruptPin, OUTPUT);
 	pinMode(interruptPin2, OUTPUT);
 	pinMode(ZamLed, OUTPUT);
-	pinMode(shiftLed, OUTPUT);
+	pinMode(polyRhythmLed, OUTPUT);
 	pinMode(followSwitch, INPUT_PULLUP);
 	pinMode(followLed, OUTPUT);
 
@@ -281,10 +305,10 @@ void setup()
 	if (!runClock) {
 		currentStep = 0;
 	}
-	//changePageMode(pageMode);
+	//changeselectedTrack(selectedTrack);
 	
 	if (EEPROM.read(1000) == 123) { //look for magic number that means we have stored something in EEPROM
-		digitalWrite(shiftLed, HIGH);
+		digitalWrite(polyRhythmLed, HIGH);
 		recallSeq();
 		
 	}
@@ -294,7 +318,7 @@ void setup()
 	delay(1000);
 	clearPage();
 	updatePage(0);
-	digitalWrite(shiftLed, LOW);
+	digitalWrite(polyRhythmLed, LOW);
 	forceUpdate = true;
 	updatePage(0);
 	firstRun = false;

@@ -16,7 +16,7 @@ void handleFollowIndicator() {
 
 void handlePageButtons(byte buttonToHandle) {
 	if (SHIFT) {
-		if (pageMode == 0) {
+		if (selectedTrack == 0) {
 			if (bitRead(isMutedInt, buttonToHandle >> 4)) {
 				bitClear(isMutedInt, buttonToHandle >> 4);
 			}
@@ -28,23 +28,23 @@ void handlePageButtons(byte buttonToHandle) {
 			setAllVertButts();
 		}
 		else {
-			//Serial.print("pagemode = ");
-			//Serial.println(pageMode);
-			if(pageMode != 8 & pageMode != 9){
-			triggerImmediately(pageMode - 1, 15-((buttonToHandle >> 4) + scrollOffset));
+			//Serial.print("selectedTrack = ");
+			//Serial.println(selectedTrack);
+			if(selectedTrack != 8 & selectedTrack != 9){
+			triggerImmediately(selectedTrack - 1, 15-((buttonToHandle >> 4) + scrollOffset));
 			}
 			else { //if its a mono midi track
 				uint16_t myNumber = (buttonToHandle>>4);
 				//Serial.print("myNumber = ");
 				//Serial.println(myNumber);
 
-				triggerImmediately(pageMode - 1, myNumber);
+				triggerImmediately(selectedTrack - 1, myNumber);
 			}
 		}
 
 	}
 	else {
-		changePageMode((buttonToHandle >> 4) + 1);
+		changeselectedTrack((buttonToHandle >> 4) + 1);
 	}
 
 }
@@ -100,7 +100,7 @@ void handleLPNoteOn(byte channel, byte pitch, byte velocity) {
 		////////////////////////////////////////////////////////////////
 
 
-		if (pageMode == 0) { //IF WE ARE IN OVERVIEW MODE
+		if (selectedTrack == 0) { //IF WE ARE IN OVERVIEW MODE
 			int matrixCursor = LPtoMatrix[pitch] + (currentPage * 8);
 			if (seqMatrix[matrixCursor] > 0) {
 				seqMatrix[matrixCursor] = 0;
@@ -115,18 +115,18 @@ void handleLPNoteOn(byte channel, byte pitch, byte velocity) {
 
 
 		else { //if page mode isnt 0, we are not in overview mode and note
-			byte trackSelector = pageMode - 1; // this is the track we are writing to basically
-			int matrixCursor = LPtoMatrix[pitch % 16] + (currentPage * 8) + trackSelector * matrixTrackOffset; //this is what matrix entry we are editing
+			byte matrixTrackSelector = selectedTrack - 1; // this is the track we are writing to basically
+			int matrixCursor = LPtoMatrix[pitch % 16] + (currentPage * 8) + matrixTrackSelector * matrixTrackOffset; //this is what matrix entry we are editing
 			//////Serial.print("isPoly = ");
-			//////Serial.println(isPoly[trackSelector]);
-			if (isPoly[trackSelector]) {								//if this is a polyphonic 8 output track
+			//////Serial.println(isPoly[matrixTrackSelector]);
+			if (isPoly[matrixTrackSelector]) {								//if this is a polyphonic 8 output track
 				if (bitRead(seqMatrix[matrixCursor], rowPressed)) {		//if this bit is set
 					bitClear(seqMatrix[matrixCursor], rowPressed);		//clear it
 					LPSetLedRaw(pitch, 0);								//turn that LED off
 				}
 				else {													//if that bit isn't set
 					bitSet(seqMatrix[matrixCursor], rowPressed);		//set it
-					LPSetLedRaw(pitch, trackColours[trackSelector]);
+					LPSetLedRaw(pitch, trackColours[matrixTrackSelector]);
 					//LPSetLed(pitch, trackColours[rowPressed]);		//turn that LED off
 				}
 				//////////Serial.print("that entry is now = ");
@@ -174,10 +174,10 @@ void handleLPNoteOn(byte channel, byte pitch, byte velocity) {
 
 
 				forceUpdate = true;
-				updatePage(pageMode);
+				updatePage(selectedTrack);
 			}
 			//forceUpdate = true;
-			//updatePage(pageMode);
+			//updatePage(selectedTrack);
 		}
 		break;
 	}
@@ -212,7 +212,7 @@ void handleLPCC(byte channel, byte CC, byte val) {
 			if (currentStep < startStep || currentStep > endStep) {
 				currentStep = startStep + (currentStep % 8);
 				
-				updatePage(pageMode);
+				updatePage(selectedTrack);
 			}
 			break;
 
@@ -229,7 +229,7 @@ void handleLPCC(byte channel, byte CC, byte val) {
 			}
 			if (currentStep < startStep || currentStep > endStep) {
 				currentStep = startStep + (currentStep % 8);
-				updatePage(pageMode);
+				updatePage(selectedTrack);
 			}
 			break;
 
@@ -246,7 +246,7 @@ void handleLPCC(byte channel, byte CC, byte val) {
 			}
 			if (currentStep < startStep || currentStep > endStep) {
 				currentStep = startStep + (currentStep % 8);
-				updatePage(pageMode);
+				updatePage(selectedTrack);
 			}
 			break;
 
@@ -264,7 +264,7 @@ void handleLPCC(byte channel, byte CC, byte val) {
 			}
 			if (currentStep < startStep || currentStep > endStep) {
 				currentStep = startStep + (currentStep % 8);
-				updatePage(pageMode);
+				updatePage(selectedTrack);
 			}
 			break;
 
@@ -280,7 +280,7 @@ void handleLPCC(byte channel, byte CC, byte val) {
 				else {
 					pageSelect--;					//else decrement page by one
 				}
-				updatePage(pageMode);
+				updatePage(selectedTrack);
 				//////////Serial.print("pageSelect = ");
 				//////////Serial.println(pageSelect);
 			}
@@ -289,6 +289,9 @@ void handleLPCC(byte channel, byte CC, byte val) {
 		case 6:
 			if (SHIFT) {
 				timeSig = 2; //set timesig to 3/3
+				
+				//tripletStepDuration = (stepDuration * 4)/3;
+				oldTimeSig = 2;
 				handleTimeSigDisplay();
 			}
 			else {
@@ -296,7 +299,7 @@ void handleLPCC(byte channel, byte CC, byte val) {
 				if (pageSelect >= numberOfPages) {
 					pageSelect = 0;
 				}
-				updatePage(pageMode);
+				updatePage(selectedTrack);
 				////////Serial.print("pageSelect = ");
 				////////Serial.println(pageSelect);
 			}
@@ -306,12 +309,13 @@ void handleLPCC(byte channel, byte CC, byte val) {
 			if (SHIFT) {
 				timeSig = 1; //set timeSig to 7/8
 				handleTimeSigDisplay();
+				oldTimeSig = 1;
 			}
 			else {
 				oldScrollOffset = scrollOffset;
 				scrollOffset--;
 				limitScrollOffset();
-				trackScrollOffsets[pageMode + altMidiTrack] = scrollOffset; // remember settings per track to be recalled when pagemode changes
+				trackScrollOffsets[selectedTrack + altMidiTrack] = scrollOffset; // remember settings per track to be recalled when selectedTrack changes
 				forceUpdate = true;
 				updatePage(currentPage);
 				//Serial.print("scrollOffset = ");
@@ -327,7 +331,7 @@ void handleLPCC(byte channel, byte CC, byte val) {
 				oldScrollOffset = scrollOffset;
 				scrollOffset++;
 				limitScrollOffset();
-				trackScrollOffsets[pageMode + altMidiTrack] = scrollOffset; // remember settings per track to be recalled when pagemode changesfg
+				trackScrollOffsets[selectedTrack + altMidiTrack] = scrollOffset; // remember settings per track to be recalled when selectedTrack changesfg
 				forceUpdate = true;
 				updatePage(currentPage);
 				//Serial.print("scrollOffset = ");
@@ -346,8 +350,8 @@ void handleLPCC(byte channel, byte CC, byte val) {
 
 void limitScrollOffset() {
 	//////Serial.print("ispoly = ");
-	//////Serial.println(isPoly[pageMode - 1]);
-	if (isPoly[pageMode - 1]) {
+	//////Serial.println(isPoly[selectedTrack - 1]);
+	if (isPoly[selectedTrack - 1]) {
 		if (scrollOffset > 8) {
 
 			scrollOffset = oldScrollOffset;   //limit scrollOffset to 0-7
@@ -390,7 +394,7 @@ void handleKnobsAndButtons() {
 	bool oldButtX = buttX;
 	buttX = !digitalRead(buttXpin);
 	SHIFT = buttX;
-	digitalWrite(shiftLed, SHIFT);
+	digitalWrite(polyRhythmLed, polyRhythm[selectedTrack]&&globalPolyRhythmEnable);
 	//stepDuration = ((2048+minStepDuration) - (knobA << 1));
 
 	if (buttA && !oldButtA) {
@@ -404,13 +408,14 @@ void handleKnobsAndButtons() {
 			}
 		}
 		else {
+			masterStep = -1;
 			currentStep = -1;
 			clockTimer = -1;
 			midiClockCounter = -1;
 		//	clearTopLedsArray();
 		//	handleTopLeds();
 
-			//updatePage(pageMode);
+			//updatePage(selectedTrack);
 		}
 	}
 
@@ -445,28 +450,27 @@ void handleKnobsAndButtons() {
 
 	if (buttC && !oldButtC) {
 		unsigned long now = millis();
-		if (now - tapTempoTimer < 1000 && now - tapTempoTimer>minStepDuration * 2) {
-			stepDuration = now - tapTempoTimer;
+
+		if (SHIFT) {
+			polyRhythm[selectedTrack] = !polyRhythm[selectedTrack];
+			globalPolyRhythmEnable = polyRhythm[0];
 		}
-
-		tapTempoTimer = now;
-
-		if (!runClock) {
-			lastStep = currentStep;
-			if (SHIFT) {
-				currentStep--;
-
-				if (currentStep < 0) {
-					currentStep = seqLength - 1;
-				}
+		else {
+			if (now - tapTempoTimer < 1000 && now - tapTempoTimer>minStepDuration * 2) {
+				stepDuration = now - tapTempoTimer;
 			}
-			else {
+			
+			tapTempoTimer = now;
+			
+			if (!runClock) {
+				lastStep = currentStep;
 				currentStep++;
+				currentStep = currentStep % seqLength;
+				handleStep();
+				updatePage(selectedTrack);
 			}
-			currentStep = currentStep % seqLength;
-			handleStep();
-			updatePage(pageMode);
 		}
+
 	}
 
 	//////////Serial.print("stepDuration ");

@@ -1,8 +1,8 @@
 
 void debugaroonie() {
-	digitalWrite(shiftLed, HIGH);
+	digitalWrite(polyRhythmLed, HIGH);
 	delay(1000);
-	digitalWrite(shiftLed, LOW);
+	digitalWrite(polyRhythmLed, LOW);
 	delay(500);
 }
 

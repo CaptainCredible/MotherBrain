@@ -1,4 +1,4 @@
-byte oldPageMode = 0;
+byte oldselectedTrack = 0;
 
 //need to separate curentpage from viewpage
 
@@ -51,44 +51,41 @@ void displayPageNumber() {
 
 	void updatePage(byte mode) { // forceUpdate is a boolean to force a page update even if its not a page flip
 		if (follow) {    //if we are in follow mode, the page should correspond to the page the cursor is on. 
-			if (currentPage != (currentStep >> 3) || forceUpdate || pageMode != oldPageMode) { //Time to flip the page
-				
+			if (currentPage != (currentStep >> 3) || forceUpdate || selectedTrack != oldselectedTrack) { //Time to flip the page	
 				clearPage();
-				oldPageMode = mode;
+				oldselectedTrack = mode;
 				forceUpdate = false;
-				//digitalWrite(ledApin, forceUpdate);
 				if (prevPage != currentPage) {
-
 					//displayPageNumber();	
 				}
 				prevPage = currentPage;
 				currentPage = currentStep >> 3;
 				firstStepOfPage = currentPage * 8;
 				updateVertButts();
-				if (pageMode == 0) {
+				if (selectedTrack == 0) {
 					handleOverviewPage();
 				}
 				else {
-					handleTrackPage(pageMode);
+					handleTrackPage(selectedTrack);
 				}
 			}
 
 		}
 		else {  // if we are not in follow mode
-			if (currentPage != (pageSelect) || forceUpdate || pageMode != oldPageMode) { //Time to flip the page
+			if (currentPage != (pageSelect) || forceUpdate || selectedTrack != oldselectedTrack) { //Time to flip the page
 				clearPage();
-				oldPageMode = mode;
+				oldselectedTrack = mode;
 				forceUpdate = false;
 				//digitalWrite(ledApin, forceUpdate);
 				prevPage = currentPage;
 				currentPage = pageSelect;
 				firstStepOfPage = currentPage * 8;
 				updateVertButts();
-				if (pageMode == 0) {
+				if (selectedTrack == 0) {
 					handleOverviewPage();
 				}
 				else {
-					handleTrackPage(pageMode);
+					handleTrackPage(selectedTrack);
 				}
 			}
 		}
@@ -269,16 +266,16 @@ void displayPageNumber() {
 
 	
 
-	void changePageMode(byte newMode) {
+	void changeselectedTrack(byte newMode) {
 		scrollOffset = trackScrollOffsets[newMode + altMidiTrack];
 		
 
-		if (newMode != pageMode) { //if a track is selected
+		if (newMode != selectedTrack) { //if a track is selected
 			clearVertButts();
-			pageMode = newMode;
+			selectedTrack = newMode;
 			altMidiTrack = SHIFT;
 		}
-		else if (pageMode == 8 && !altMidiTrack) {
+		else if (selectedTrack == 8 && !altMidiTrack) {
 			altMidiTrack = true;
 			digitalWrite(ZamLed, altMidiTrack);
 			scrollOffset = trackScrollOffsets[newMode + altMidiTrack];
@@ -286,13 +283,13 @@ void displayPageNumber() {
 		}
 
 		else {						//if the same page is selected again and we are not on ZIM
-			pageMode = 0;			//go to overview
+			selectedTrack = 0;			//go to overview
 			altMidiTrack = false;
 			digitalWrite(ZamLed, altMidiTrack);
 		}
 		
 		forceUpdate = true;
-		updatePage(pageMode);
+		updatePage(selectedTrack);
 	}
 
 	void 	clearVertButts() {
@@ -314,11 +311,11 @@ void displayPageNumber() {
 
 
 	void updateVertButts() {
-		if (pageMode == 0) {
+		if (selectedTrack == 0) {
 			setAllVertButts();
 		}
 		else {
-			launchPad.sendNoteOn(vertButts[pageMode - 1], trackColours[pageMode - 1], 1);
+			launchPad.sendNoteOn(vertButts[selectedTrack - 1], trackColours[selectedTrack - 1], 1);
 			delay(1);
 		}
 	}
