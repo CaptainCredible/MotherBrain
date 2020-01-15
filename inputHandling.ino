@@ -491,16 +491,6 @@ void handleKnobsAndButtons() {
 				midiClockDiv = 3 + ((knobA >> 8) * 3);
 			}
 
-			/*
-			//////Serial.print("BPM = ");
-			//////Serial.println(BPM);
-			//////Serial.print("beatLength = ");
-			//////Serial.println(beatLength);
-			//////Serial.print("Stepduration = ");
-			//////Serial.println(stepDuration);
-			//////Serial.println();
-			//////Serial.println();
-			*/
 		}
 	}
 

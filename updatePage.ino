@@ -284,8 +284,7 @@ void handleCursor() {
 		//}
 		launchPad.sendControlChange(topButts[tempStep % 8], seqLedColour, 1);  //sets seqstepled regardless of whether they are on or not
 		topLedWasSet[tempStep % 8] = true;
-		Serial.print("tempStep % 8 = ");
-		Serial.println(tempStep % 8);
+		
 	}
 	else if (currentPage == lastStep >> 3) {
 		launchPad.sendControlChange(topButts[lastStep % 8], 0, 1);
@@ -294,7 +293,6 @@ void handleCursor() {
 
 
 void cleanupLeds() {
-	Serial.println();
 	for (byte i = 0; i < 8; i++) {
 		if (!topLedWasSet[i] && oldTopLedWasSet[i]) { // if led is supposed to be off now but was on last time
 			launchPad.sendControlChange(topButts[i], 0, 1);
@@ -304,16 +302,6 @@ void cleanupLeds() {
 			//Serial.print("-");
 		}
 	}
-	for (int i = 0; i < 8; i++) {
-		if (topLedWasSet[i]) {
-			Serial.print("* ");
-		}
-		else {
-			Serial.print("- ");
-		}
-	}
-
-	Serial.println();
 }
 
 

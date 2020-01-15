@@ -341,11 +341,12 @@ void setup()
 
 	//EEPROM.write(1023, 123);
 	//delay(4000);
-	if (EEPROM.read(1000) == 123) { //look for magic number that means we have stored something in EEPROM
-		Serial.println("found 123 at 10");
+	if (EEPROM.read(1023) == 123) { //look for magic number that means we have stored something in EEPROM
+		
 		digitalWrite(polyRhythmLed, HIGH);
 		recallSeq();
 	}
+
 	/*
 	if (EEPROM.read(1022) == 122) { //look for magic number that means we have stored something in EEPROM
 		Serial.println("found 122 at 1022");

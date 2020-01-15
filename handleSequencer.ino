@@ -120,26 +120,7 @@ void handleClock() {
 }
 
 void handleStep() {
-	/*
-	//Serial.print("currentStep = ");
-	//Serial.println(currentStep);
-	//Serial.print("polyCurrentStep = ");
-	//Serial.println(polyCurrentStep[selectedTrack]);
-	//Serial.print("currentPage = ");
-	//Serial.println(currentPage);
-	//Serial.println();
 	
-	Serial.print("masterStep = ");
-	Serial.println(masterStep);
-	Serial.print("currentStep = ");
-	Serial.println(currentStep);
-	Serial.print("polyCurrentStep for track ");
-	Serial.print(selectedTrack);
-	Serial.print(" = ");
-	Serial.println(polyCurrentStep[selectedTrack]);
-	
-	//Serial.println(numberOfPages);
-	*/
 	for (byte track = 0; track < numberOfTracks; track++) {					//repeat for every track 0-15
 		int matrixCursor = 0;
 		if ((polyRhythm[track + 1]) && globalPolyRhythmEnable) {
@@ -179,7 +160,7 @@ void handleStep() {
 	tracksBuffer16x8[8] = currentStep; //slot number eight is where we send the current step number
 	tracksBuffer16x8[9] = isMutedInt;  //slot 9 is where the mutes are stored
 	sendTracksBuffer();
-	//////Serial.println(tracksBuffer16x8[8]);
+	
 
 }
 
@@ -197,21 +178,7 @@ void radioSendStartAndTempo(byte tempo) {
 	//sendWire2microBitTrackAndNote(102, tempo);			//send that note to microbit (ask microbit to request it.
 }
 
-void EEPROMTest() {
-	for (int i = 0; i < 512; i++) {
-		EEPROM.write(i, 111);
-		int poop = EEPROM.read(i);
-		//Serial.print(i);
-		//Serial.print(" read ");
-		//Serial.print(poop);
-		if (poop != 111) {
-			//Serial.print(" ERROR!");
-		}
-		//Serial.println();
-	}
-	EEPROM.write(1000, 0);
-}
-
+/*
 void storeSeqAlt() {
 	//handle MSBs
 	for (int i = 0; i < 256; i++) {
@@ -237,44 +204,8 @@ void storeSeqAlt() {
 	}
 	EEPROM.write(1000, 0);
 }
+*/
 
-void storeSeq() {
-	clearVertButts();
-	for (int i = 0; i < 256; i++) {
-		uint16_t MSB = seqMatrix[i] >> 8;
-		uint16_t LSB = seqMatrix[i] & 0b0000000011111111;
-
-		int writeCursor = i * 2;
-
-		EEPROM.write(writeCursor, MSB);
-
-		byte MSBread = EEPROM.read(writeCursor);
-
-		EEPROM.write(writeCursor + 1, LSB);
-
-		byte LSBread = EEPROM.read(writeCursor + 1);
-
-		if (LSB != LSBread) {
-			//Serial.print(" LSB MISMATCH!!!   ");
-		}
-		if (MSB != MSBread) {
-			//Serial.print(" MSB MISMATCH!!!   ");
-		}
-
-
-	}
-	for (int i = 0; i < 8; i++) {
-		launchPad.sendNoteOn(vertButts[i], trackColours[i], 1);
-		delay(100);
-
-	}
-	EEPROM.write(1000, 123);
-	//Serial.println("wrote 123");
-	//Serial.print("Read:  ");
-	//Serial.println(EEPROM.read(1000));
-	updateVertButts();
-	//compareSeqMatrixes();
-}
 
 /*
 void compareSeqMatrixes() {
@@ -304,16 +235,46 @@ void recallDummySeq() {
 }
 */
 
+void storeSeq() {
+	clearVertButts();
+	for (int i = 0; i < 512; i++) {
+		uint16_t MSB = seqMatrix[i] >> 8;
+		uint16_t LSB = seqMatrix[i] & 0b0000000011111111;
+		int writeCursor = i * 2; //// what?
+		EEPROM.write(writeCursor, MSB);
+		byte MSBread = EEPROM.read(writeCursor);
+		EEPROM.write(writeCursor + 1, LSB);
+		byte LSBread = EEPROM.read(writeCursor + 1);
+		if (LSB != LSBread) {
+			Serial.print(" LSB MISMATCH!!!   ");
+		}
+		if (MSB != MSBread) {
+			Serial.print(" MSB MISMATCH!!!   ");
+		}
+
+
+	}
+	for (int i = 0; i < 8; i++) {
+		launchPad.sendNoteOn(vertButts[i], trackColours[i], 1);
+		delay(100);
+
+	}
+	EEPROM.write(1023, 123);
+	updateVertButts();
+}
+
+
 void recallSeq() {
 	clearVertButts();
-	int loadingBar = 0;
-	for (int i = 0; i < 256; i++) {
+	for (int i = 0; i < 512; i++) {
 		int readCursor = i * 2;
 		uint8_t MSB = EEPROM.read(readCursor);
 		uint8_t LSB = EEPROM.read(readCursor + 1);
 		uint16_t seqValToWrite = (MSB << 8) + LSB;
 		seqMatrix[i] = seqValToWrite;
 	}
+
+	seqMatrix[511] = 0;
 	updateVertButts();
 
 }

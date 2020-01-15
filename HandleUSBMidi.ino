@@ -61,8 +61,8 @@ void usbmidiprocessing() {
 		else if (e.type == RESTART) {
 			resetSeq();
 		}
-		Serial.print("e.type = ");
-		Serial.println(e.type);
+		//Serial.print("e.type = ");
+		//Serial.println(e.type);
 	}
 	
 	if (MIDIUSB.available() == 0 && hadANoteOn) {  //if there is no message but there was on prev iteration
