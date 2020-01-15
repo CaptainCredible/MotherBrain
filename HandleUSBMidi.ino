@@ -34,7 +34,6 @@ void usbmidiprocessing() {
 	internalClockSelect = runClock;
 	
 	while (MIDIUSB.available() > 0) {
-		//Serial.println("PING");
 		MIDIEvent e = MIDIUSB.read();
 		// IF NOTE ON WITH VELOCITY GREATER THAN ZERO
 		if ((e.type == NOTEON) && (e.m3 > 0)) {
@@ -60,10 +59,10 @@ void usbmidiprocessing() {
 		}
 		
 		else if (e.type == RESTART) {
-			
 			resetSeq();
-			
 		}
+		Serial.print("e.type = ");
+		Serial.println(e.type);
 	}
 	
 	if (MIDIUSB.available() == 0 && hadANoteOn) {  //if there is no message but there was on prev iteration
@@ -88,7 +87,7 @@ void usbmidiprocessing() {
 
 
 void resetSeq() {
-	currentStep = -1;
+	masterStep = -1;
 }
 
 void debugInt(unsigned int valToPrint) {

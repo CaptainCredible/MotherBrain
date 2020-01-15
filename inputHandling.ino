@@ -22,7 +22,7 @@ void handlePageButtons(byte buttonToHandle) {
 			}
 			else {
 				bitSet(isMutedInt, buttonToHandle >> 4);
-			} 
+			}
 			//Serial.println(isMutedInt, BIN);
 			sendMutes();
 			setAllVertButts();
@@ -30,11 +30,11 @@ void handlePageButtons(byte buttonToHandle) {
 		else {
 			//Serial.print("selectedTrack = ");
 			//Serial.println(selectedTrack);
-			if(selectedTrack != 8 & selectedTrack != 9){
-			triggerImmediately(selectedTrack - 1, 15-((buttonToHandle >> 4) + scrollOffset));
+			if (selectedTrack != 8 & selectedTrack != 9) {
+				triggerImmediately(selectedTrack - 1, 15 - ((buttonToHandle >> 4) + scrollOffset));
 			}
 			else { //if its a mono midi track
-				uint16_t myNumber = (buttonToHandle>>4);
+				uint16_t myNumber = (buttonToHandle >> 4);
 				//Serial.print("myNumber = ");
 				//Serial.println(myNumber);
 
@@ -102,6 +102,11 @@ void handleLPNoteOn(byte channel, byte pitch, byte velocity) {
 
 		if (selectedTrack == 0) { //IF WE ARE IN OVERVIEW MODE
 			int matrixCursor = LPtoMatrix[pitch] + (currentPage * 8);
+			
+			if (seqMatrixShift) {
+				matrixCursor += 256;
+			}
+
 			if (seqMatrix[matrixCursor] > 0) {
 				seqMatrix[matrixCursor] = 0;
 				LPSetLedRaw(pitch, 0);
@@ -117,6 +122,9 @@ void handleLPNoteOn(byte channel, byte pitch, byte velocity) {
 		else { //if page mode isnt 0, we are not in overview mode and note
 			byte matrixTrackSelector = selectedTrack - 1; // this is the track we are writing to basically
 			int matrixCursor = LPtoMatrix[pitch % 16] + (currentPage * 8) + matrixTrackSelector * matrixTrackOffset; //this is what matrix entry we are editing
+			if (seqMatrixShift) {
+				matrixCursor += 256;
+			}
 			//////Serial.print("isPoly = ");
 			//////Serial.println(isPoly[matrixTrackSelector]);
 			if (isPoly[matrixTrackSelector]) {								//if this is a polyphonic 8 output track
@@ -170,20 +178,14 @@ void handleLPNoteOn(byte channel, byte pitch, byte velocity) {
 					//////Serial.println(seqMatrix[matrixCursor >> 8]);
 				}
 
-
-
-
 				forceUpdate = true;
 				updatePage(selectedTrack);
 			}
-			//forceUpdate = true;
-			//updatePage(selectedTrack);
+
 		}
 		break;
 	}
 
-
-	//handleTopLeds();
 }
 
 void handleLPNoteOff(byte channel, byte pitch, byte velocity) {
@@ -195,155 +197,209 @@ void handleLPCC(byte channel, byte CC, byte val) {
 	byte buttWasPressed = CC - 103;
 	if (val > 0) {
 		//////////Serial.println(buttWasPressed);
-		switch (buttWasPressed)
-		{
-		case 1:
-			if (!SHIFT) { //SET no of pages to 2
-				
-				seqLength = 8;
-				desiredEndStep = 8;
-				calculateStartAndEndStep();
-				currentStep = currentStep % seqLength;
-			}
-			else {
-				desiredStartStep = 0;
-				calculateStartAndEndStep();
-			}
-			if (currentStep < startStep || currentStep > endStep) {
-				currentStep = startStep + (currentStep % 8);
-				
-				updatePage(selectedTrack);
-			}
-			break;
+		if (!SHIFT) {
+			switch (buttWasPressed)
+			{
+			case 1:
+					if (selectedTrack != 0 && globalPolyRhythmEnable && polyRhythm[selectedTrack]) {
+						desiredPolyEndStep[selectedTrack] = 8;
+					}
+					else {
+						desiredEndStep = 8;
+					}
+					
+				break;
 
-		case 2:
-			if (!SHIFT) { //SET no of pages to 2
-				seqLength = 16;
-				desiredEndStep = 16;
-				calculateStartAndEndStep();
-				currentStep = currentStep % seqLength;
-			}
-			else {
-				desiredStartStep = 8;	
-				calculateStartAndEndStep();
-			}
-			if (currentStep < startStep || currentStep > endStep) {
-				currentStep = startStep + (currentStep % 8);
-				updatePage(selectedTrack);
-			}
-			break;
-
-		case 3:
-			if (!SHIFT) { //SET no of pages to 3
-				seqLength = 24;
-				desiredEndStep = 24;
-				calculateStartAndEndStep();
-				currentStep = currentStep % seqLength;
-			}
-			else {
-				desiredStartStep = 16;
-				calculateStartAndEndStep();
-			}
-			if (currentStep < startStep || currentStep > endStep) {
-				currentStep = startStep + (currentStep % 8);
-				updatePage(selectedTrack);
-			}
-			break;
-
-		case 4:
-			if (!SHIFT) { //SET no of pages to 4
-				seqLength = 32;
-				desiredEndStep = 32;
-				calculateStartAndEndStep();
-				
-				currentStep = currentStep % seqLength;
-			}
-			else {
-				desiredStartStep = 24;
-				calculateStartAndEndStep();
-			}
-			if (currentStep < startStep || currentStep > endStep) {
-				currentStep = startStep + (currentStep % 8);
-				updatePage(selectedTrack);
-			}
-			break;
-
-		case 5:
-			if (SHIFT) { //SET timesig to 5/8
-				timeSig = 3;
-				handleTimeSigDisplay();
-			}
-			else {
-				if (pageSelect == 0) {				//if we are already at page 0
-					pageSelect = numberOfPages - 1;	//go back to last page
+			case 2:
+				if (selectedTrack != 0 && globalPolyRhythmEnable && polyRhythm[selectedTrack]) {
+					desiredPolyEndStep[selectedTrack] = 16;
 				}
 				else {
-					pageSelect--;					//else decrement page by one
+					desiredEndStep = 16;
 				}
-				updatePage(selectedTrack);
-				//////////Serial.print("pageSelect = ");
-				//////////Serial.println(pageSelect);
-			}
-			break;
+				break;
 
-		case 6:
-			if (SHIFT) {
-				timeSig = 2; //set timesig to 3/3
-				
-				//tripletStepDuration = (stepDuration * 4)/3;
-				oldTimeSig = 2;
+			case 3:
+				if (selectedTrack != 0 && globalPolyRhythmEnable && polyRhythm[selectedTrack]) {
+					desiredPolyEndStep[selectedTrack] = 24;
+				}
+				else {
+					desiredEndStep = 24;
+				}
+				break;
+
+			case 4:
+				if (selectedTrack != 0 && globalPolyRhythmEnable && polyRhythm[selectedTrack]) {
+					desiredPolyEndStep[selectedTrack] = 32;
+				}
+				else {
+					desiredEndStep = 32;
+				}
+				break;
+
+			case 5:
+					if (pageSelect == 0) {				//if we are already at page 0
+						pageSelect = numberOfPages - 1;	//go back to last page
+					}
+					else {
+						pageSelect--;					//else decrement page by one
+					}
+					updatePage(selectedTrack);
+				break;
+
+			case 6:
+					pageSelect++;
+					if (pageSelect >= numberOfPages) {
+						pageSelect = 0;
+					}
+					updatePage(selectedTrack);
+					////////Serial.print("pageSelect = ");
+					////////Serial.println(pageSelect);
+				break;
+
+			case 7:
+				if (selectedTrack != 0) {
+					oldScrollOffset = scrollOffset;
+					scrollOffset--;
+					limitScrollOffset();
+					trackScrollOffsets[selectedTrack + altMidiTrack] = scrollOffset; // remember settings per track to be recalled when selectedTrack changes
+					forceUpdate = true;
+					updatePage(currentPage);
+				}
+				else {
+					if (seqMatrixShift) {
+						seqMatrixShift = false;
+						forceUpdate = true;
+						updatePage(currentPage);
+					}
+				}
+					
+
+				break;
+			case 8:
+				if (selectedTrack != 0) {
+					oldScrollOffset = scrollOffset;
+					scrollOffset++;
+					limitScrollOffset();
+					trackScrollOffsets[selectedTrack + altMidiTrack] = scrollOffset; // remember settings per track to be recalled when selectedTrack changesfg
+					forceUpdate = true;
+					updatePage(currentPage);
+				}
+				else {
+					if (!seqMatrixShift) {
+						seqMatrixShift = true;
+						forceUpdate = true;
+						updatePage(currentPage);
+					}
+				}
+					
+				break;
+			default:
+				trackToSend = buttWasPressed - 1;
+				break;
+
+			}
+			calculateStartAndEndSteps();
+			calculateSeqLengths();
+			currentStep = currentStep % seqLength;
+
+
+			if (currentStep < startStep || currentStep > endStep) {
+				currentStep = startStep + (currentStep % 8);
+				updatePage(selectedTrack);
+			}
+			if (globalPolyRhythmEnable) {
+				if (polyCurrentStep[selectedTrack] < polyStartStep[selectedTrack] || polyCurrentStep[selectedTrack] > polyEndStep[selectedTrack]) {
+					polyCurrentStep[selectedTrack] = polyStartStep[selectedTrack] + (polyCurrentStep[selectedTrack] % 8);
+					updatePage(selectedTrack);
+				}
+			}
+			// ADD POLY VERSION OF ABOVE CODE (I DID)
+
+
+		}
+		else {
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			///////////// SHIFT ///////////////////////////////////////////////////////////////////////////////////////////////////////
+			//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			switch (buttWasPressed)
+			{
+			case 1:
+				if (selectedTrack != 0 && globalPolyRhythmEnable && polyRhythm[selectedTrack]) {
+					desiredPolyStartStep[selectedTrack] = 0;
+				}
+				else {
+					desiredStartStep = 0;
+				}
+					
+				break;
+
+			case 2:
+				if (selectedTrack != 0 && globalPolyRhythmEnable && polyRhythm[selectedTrack]) {
+					desiredPolyStartStep[selectedTrack] = 8;
+				}
+				else {
+					desiredStartStep = 8;
+				}
+				break;
+
+			case 3:
+				if (selectedTrack != 0 && globalPolyRhythmEnable && polyRhythm[selectedTrack]) {
+					desiredPolyStartStep[selectedTrack] = 16;
+				}
+				else {
+					desiredStartStep = 16;
+				}
+				break;
+
+			case 4:
+				if (selectedTrack != 0 && globalPolyRhythmEnable && polyRhythm[selectedTrack]) {
+					desiredPolyStartStep[selectedTrack] = 24;
+				}
+				else {
+					desiredStartStep = 24;
+				}
+				break;
+
+			case 5:
+				timeSig = 3;
 				handleTimeSigDisplay();
-			}
-			else {
-				pageSelect++;
-				if (pageSelect >= numberOfPages) {
-					pageSelect = 0;
-				}
-				updatePage(selectedTrack);
-				////////Serial.print("pageSelect = ");
-				////////Serial.println(pageSelect);
-			}
-			break;
+				oldTimeSig = 3;
+				cleanupLeds();
+				break;
 
-		case 7:
-			if (SHIFT) {
+			case 6:
+				timeSig = 2; //set timesig to 3/3
+				handleTimeSigDisplay();
+				oldTimeSig = 2;
+				cleanupLeds();
+				break;
+
+			case 7:
 				timeSig = 1; //set timeSig to 7/8
 				handleTimeSigDisplay();
 				oldTimeSig = 1;
-			}
-			else {
-				oldScrollOffset = scrollOffset;
-				scrollOffset--;
-				limitScrollOffset();
-				trackScrollOffsets[selectedTrack + altMidiTrack] = scrollOffset; // remember settings per track to be recalled when selectedTrack changes
-				forceUpdate = true;
-				updatePage(currentPage);
-				//Serial.print("scrollOffset = ");
-				//Serial.println(scrollOffset);
-			}
-			break;
-		case 8:
-			if (SHIFT) {
+				cleanupLeds();
+
+				break;
+			case 8:
 				timeSig = 0; //set timeSig to 4/4;
 				handleTimeSigDisplay();
-			}
-			else {
-				oldScrollOffset = scrollOffset;
-				scrollOffset++;
-				limitScrollOffset();
-				trackScrollOffsets[selectedTrack + altMidiTrack] = scrollOffset; // remember settings per track to be recalled when selectedTrack changesfg
-				forceUpdate = true;
-				updatePage(currentPage);
-				//Serial.print("scrollOffset = ");
-				//Serial.println(scrollOffset);
-			}
+				oldTimeSig = 0;
+				cleanupLeds();
 
-			break;
-		default:
-			trackToSend = buttWasPressed - 1;
-			//////////Serial.print("trackToSend = ");
-			//////////Serial.println(trackToSend);
-			break;
+				break;
+			default:
+				trackToSend = buttWasPressed - 1;
+				break;
+			}
+			calculateStartAndEndSteps();
+			calculateSeqLengths();
+			if (currentStep < startStep || currentStep > endStep) {
+				currentStep = startStep + (currentStep % 8);
+				updatePage(selectedTrack);
+			}
 		}
 	}
 }
@@ -394,7 +450,7 @@ void handleKnobsAndButtons() {
 	bool oldButtX = buttX;
 	buttX = !digitalRead(buttXpin);
 	SHIFT = buttX;
-	digitalWrite(polyRhythmLed, polyRhythm[selectedTrack]&&globalPolyRhythmEnable);
+	digitalWrite(polyRhythmLed, polyRhythm[selectedTrack] && globalPolyRhythmEnable);
 	//stepDuration = ((2048+minStepDuration) - (knobA << 1));
 
 	if (buttA && !oldButtA) {
@@ -402,7 +458,7 @@ void handleKnobsAndButtons() {
 			if (!midiClockRunning) {
 				runClock = !runClock;
 			}
-			
+
 			if (runClock) {
 				//midiClockRunning = false;
 			}
@@ -412,10 +468,10 @@ void handleKnobsAndButtons() {
 			currentStep = -1;
 			clockTimer = -1;
 			midiClockCounter = -1;
-		//	clearTopLedsArray();
-		//	handleTopLeds();
+			//	clearTopLedsArray();
+			//	handleTopLeds();
 
-			//updatePage(selectedTrack);
+				//updatePage(selectedTrack);
 		}
 	}
 
@@ -459,9 +515,9 @@ void handleKnobsAndButtons() {
 			if (now - tapTempoTimer < 1000 && now - tapTempoTimer>minStepDuration * 2) {
 				stepDuration = now - tapTempoTimer;
 			}
-			
+
 			tapTempoTimer = now;
-			
+
 			if (!runClock) {
 				lastStep = currentStep;
 				currentStep++;

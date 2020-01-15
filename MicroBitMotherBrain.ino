@@ -32,6 +32,8 @@ UsbTransport sUsbTransport;
 
 unsigned long masterStep = 0;
 
+bool pageWasCleared = false; // flat to keep track of whether to rewrite timesig leds
+
 bool polyRhythm[9] = { false, false, false, false, false, false, false, false, false };
 bool globalPolyRhythmEnable = polyRhythm[0];
 
@@ -39,7 +41,7 @@ int desiredPolyEndStep[9] = { 32,32,32,32,32,32,32,32,32 };
 int desiredPolyStartStep[9] = { 0,0,0,0,0,0,0,0,0 };
 int polyEndStep[9] = { 32,32,32,32,32,32,32,32,32 };
 int polyStartStep[9] = { 0,0,0,0,0,0,0,0,0 };
-int polyCurrentStep[9] = {-1,-1,-1,-1,-1,-1,-1,-1,-1};
+int polyCurrentStep[9] = { 0,0,0,0,0,0,0,0 };
 
 int polySeqLength[9] = { 32,32,32,32,32,32,32,32,32 };
 
@@ -48,8 +50,9 @@ int desiredStartStep = 0;
 int startStep = 0;
 int endStep = 32;
 
-int seqLength = endStep-startStep; // temporary debug seqlength, needs to be settable by user
-
+int seqLength = endStep - startStep; // temporary debug seqlength, needs to be settable by user
+byte polyCurrentPageThatIsPlaying[9] = { 0,0,0,0,0,0,0,0,0 };
+byte polyPreviousPageThatWasPlaying[9] = { 0,0,0,0,0,0,0,0,0 };
 
 
 
@@ -74,6 +77,7 @@ bool internalClockSelect = false;
 bool midiClockRunning = false;
 #define TICK 15
 #define RESTART 3
+
 const byte NOTEON = 0x09;
 const byte NOTEOFF = 0x08;
 const byte MCLOCKTICK = 0x03;
@@ -119,7 +123,28 @@ MIDI_CREATE_INSTANCE(UsbTransport, sUsbTransport, UMIDI);
 byte scrollOffset = 0;
 bool altMidiTrack = false;
 
+unsigned int seqMatrix[512] = {
+	0,0,0,1,0,0,0,0,	0,1,1,1,1,0,0,0,	0,1,1,1,1,1,0,0,	0,1,0,0,0,1,0,0,
+	0,0,0,1,0,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,	0,1,0,0,0,1,0,0,
+	0,0,0,1,0,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,	0,1,0,0,0,1,0,0,
+	0,0,0,1,0,0,0,0,	0,0,0,0,0,1,0,0,	0,0,1,1,1,1,0,0,	0,1,1,1,1,1,0,0,
+	0,0,0,1,0,0,0,0,	0,0,0,0,1,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,
+	0,0,0,1,0,0,0,0,	0,0,0,1,0,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,
+	0,0,0,1,0,0,0,0,	0,0,1,0,0,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,
+	0,0,0,1,0,0,0,0,	0,1,1,1,1,1,1,0,	0,1,1,1,1,1,0,0,	0,0,0,0,0,1,0,0, 
 
+	0,1,1,1,1,1,0,0,	0,1,0,0,0,0,0,0,	0,1,1,1,1,1,0,0,	0,1,1,1,1,1,0,0,
+	0,1,0,0,0,0,0,0,	0,1,0,0,0,0,0,0,	0,0,0,0,0,1,0,0,	0,1,0,0,0,1,0,0,
+	0,1,0,0,0,0,0,0,	0,1,0,0,0,0,0,0,	0,0,0,0,0,1,0,0,	0,1,0,0,0,1,0,0,
+	0,1,1,1,1,1,0,0,	0,1,1,1,1,1,0,0,	0,0,0,0,0,1,0,0,	0,1,1,1,1,1,0,0,
+	0,0,0,0,0,1,0,0,	0,1,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,	0,1,0,0,0,1,0,0,
+	0,0,0,0,0,1,0,0,	0,1,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,	0,1,0,0,0,1,0,0,
+	0,0,0,0,0,1,0,0,	0,1,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,	0,1,0,0,0,1,0,0,
+	0,1,1,1,1,1,0,0,	0,1,1,1,1,1,0,0,	0,0,0,0,0,1,0,0,	0,1,1,1,1,1,0,0 };
+
+bool seqMatrixShift = false;
+
+/*
 unsigned int seqMatrix[256] = {
 0,0,0,1,0,0,0,0,	0,1,1,1,1,0,0,0,	0,1,1,1,1,1,0,0,	0,1,0,0,0,1,0,0,
 0,0,0,1,0,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,	0,1,0,0,0,1,0,0,
@@ -129,7 +154,8 @@ unsigned int seqMatrix[256] = {
 0,0,0,1,0,0,0,0,	0,0,0,1,0,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,
 0,0,0,1,0,0,0,0,	0,0,1,0,0,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,
 0,0,0,1,0,0,0,0,	0,1,1,1,1,1,1,0,	0,1,1,1,1,1,0,0,	0,0,0,0,0,1,0,0 };
-
+*/
+/*
 unsigned int dummySeqMatrix[256] = {
 	0,0,0,1,0,0,0,0,	0,1,1,1,1,0,0,0,	0,1,1,1,1,1,0,0,	0,1,0,0,0,1,0,0,
 	0,0,0,1,0,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,	0,1,0,0,0,1,0,0,
@@ -138,12 +164,15 @@ unsigned int dummySeqMatrix[256] = {
 	0,0,0,1,0,0,0,0,	0,0,0,0,1,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,
 	0,0,0,1,0,0,0,0,	0,0,0,1,0,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,
 	0,0,0,1,0,0,0,0,	0,0,1,0,0,0,0,0,	0,0,0,0,0,1,0,0,	0,0,0,0,0,1,0,0,
-	0,0,0,1,0,0,0,0,	0,1,1,1,1,1,1,0,	0,1,1,1,1,1,0,0,	0,0,0,0,0,1,0,0 };
+	0,0,0,1,0,0,0,0,	0,1,1,1,1,1,1,0,	0,1,1,1,1,1,0,0,	0,0,0,0,0,1,0,0
+};
+*/
 
 
 
 byte numberOfPages = 4;
 
+/*
 byte oldSeqMatrix[320] = {
 	1,2,3,4,5,0,0,0,	1,0,0,0,0,0,1,0,	127,127,127,127,
 	0,0,0,0,0,0,0,0,	0,0,0,0,0,1,0,0,	127,127,127,127,
@@ -162,6 +191,7 @@ byte oldSeqMatrix[320] = {
 	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	127,127,127,127,
 	0,0,0,0,0,0,0,0,	0,0,0,0,0,0,0,0,	127,127,127,127,
 };
+*/
 #define numberOfTracks 8
 #define matrixTrackOffset 32
 
@@ -251,6 +281,8 @@ byte previousPageThatWasPlaying = 0;
 unsigned long i2cTimer = 0; //for debug
 
 bool topLedWasSet[8] = { false,false,false,false, false,false,false,false, }; //array to keep track of whether anything has writen to a specific led this time around
+bool oldTopLedWasSet[8] = { false,false,false,false, false,false,false,false, }; //array to keep track of whether anything has writen to a specific led last time around
+bool greenPageLedWasSet[4]{ false, false, false, false }; //array to track what green led to turn off
 
 void setup()
 {
@@ -306,15 +338,23 @@ void setup()
 		currentStep = 0;
 	}
 	//changeselectedTrack(selectedTrack);
-	
+
+	//EEPROM.write(1023, 123);
+	//delay(4000);
 	if (EEPROM.read(1000) == 123) { //look for magic number that means we have stored something in EEPROM
+		Serial.println("found 123 at 10");
 		digitalWrite(polyRhythmLed, HIGH);
 		recallSeq();
-		
 	}
-	else {
-		
+	/*
+	if (EEPROM.read(1022) == 122) { //look for magic number that means we have stored something in EEPROM
+		Serial.println("found 122 at 1022");
+		digitalWrite(polyRhythmLed, HIGH);
+		//recallSeq(1);
 	}
+	*/
+
+
 	delay(1000);
 	clearPage();
 	updatePage(0);
@@ -370,20 +410,20 @@ void loop() {
 	usbmidiprocessing(); //OLD USB MIDI PROCESSING
 
 #else 
-		UMIDI.read();
-		if (waitingForTimeOut) { //if we are waiting to see if there are any more messages for this step
-			if (millis() > timeOutDeadline) { //if we timed out
-				sendUsbMidiPackage();
-				waitingForTimeOut = false;
-			}
+	UMIDI.read();
+	if (waitingForTimeOut) { //if we are waiting to see if there are any more messages for this step
+		if (millis() > timeOutDeadline) { //if we timed out
+			sendUsbMidiPackage();
+			waitingForTimeOut = false;
 		}
+	}
 #endif // oldScoolMidi
 	checkTimeOut(); //reset interruptPin and isSending if the microbit missed the message
 	handleKnobsAndButtons();
 	handleRunClockActivation();
 	if (firstRun) {
 	}
-	
+
 #endif // DEBUG
 
 }

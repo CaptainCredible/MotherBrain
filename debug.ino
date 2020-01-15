@@ -5,5 +5,4 @@ void debug() {
 		delay(100);
 		launchPad.sendNoteOn(noteToSendNow, 0, 1);
 	}
-	
 }
