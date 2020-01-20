@@ -1,4 +1,4 @@
-byte oldselectedTrack = 0;
+
 
 //need to separate curentpage from viewpage
 
@@ -51,13 +51,32 @@ void displayPageNumber() {
 
 void updatePage(byte mode) { // forceUpdate is a boolean to force a page update even if its not a page flip
 
+
+
 	if (follow) {
 		int tempStep = currentStep;
 		if (globalPolyRhythmEnable && polyRhythm[selectedTrack]) {
 			tempStep = polyCurrentStep[selectedTrack];
 		}
 		if (currentPage != (tempStep >> 3) || forceUpdate || selectedTrack != oldselectedTrack) { //Time to flip the page	
-			//Serial.println("POW");
+			//Serial.print("Updated bank ");
+			//Serial.println(seqMatrixShift);
+//			Serial.print("currentPage != tempStep >> 3 = ");
+//			Serial.println(currentPage != tempStep >> 3);
+//			Serial.print("forceUpdate = ");
+//			Serial.println(forceUpdate);
+			//Serial.print("selectedTrack != oldselectedTrack = ");
+			Serial.println(selectedTrack != oldselectedTrack);
+			//Serial.print(selectedTrack);
+			//Serial.print(" != ");
+			//Serial.print(oldselectedTrack);
+
+
+			
+			Serial.println();
+
+			
+
 			clearPage();
 
 			oldselectedTrack = mode;
@@ -67,6 +86,10 @@ void updatePage(byte mode) { // forceUpdate is a boolean to force a page update 
 			}
 			prevPage = currentPage;
 			currentPage = tempStep >> 3;
+
+
+			
+
 
 			//Serial.print("currentPage = ");
 			//Serial.println(currentPage);
@@ -87,6 +110,7 @@ void updatePage(byte mode) { // forceUpdate is a boolean to force a page update 
 		if (currentPage != (pageSelect) || forceUpdate || selectedTrack != oldselectedTrack) { //Time to flip the page
 			clearPage();
 			oldselectedTrack = mode;
+			
 			forceUpdate = false;
 			//digitalWrite(ledApin, forceUpdate);
 			prevPage = currentPage;

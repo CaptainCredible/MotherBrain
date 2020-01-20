@@ -18,7 +18,7 @@ UsbTransport sUsbTransport;
 #endif
 
 
-
+byte oldselectedTrack = 0;
 #define LEDPIN 14
 #define interruptPin 16
 #define interruptPin2 10
@@ -358,7 +358,7 @@ void setup()
 
 	delay(1000);
 	clearPage();
-	updatePage(0);
+	//updatePage(0);
 	digitalWrite(polyRhythmLed, LOW);
 	forceUpdate = true;
 	updatePage(0);
@@ -400,7 +400,6 @@ void loop() {
 	//handlePageNumDisplayTimeouts();
 
 	handleClock();
-
 	launchPad.read();
 
 #ifdef OLDSCHOOLUSB
@@ -424,9 +423,8 @@ void loop() {
 	handleRunClockActivation();
 	if (firstRun) {
 	}
-
 #endif // DEBUG
-
+	//Serial.println(oldselectedTrack);
 }
 
 bool numIsDisplayed = false;

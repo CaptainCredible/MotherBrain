@@ -264,13 +264,13 @@ void handleLPCC(byte channel, byte CC, byte val) {
 					limitScrollOffset();
 					trackScrollOffsets[selectedTrack + altMidiTrack] = scrollOffset; // remember settings per track to be recalled when selectedTrack changes
 					forceUpdate = true;
-					updatePage(currentPage);
+					updatePage(selectedTrack);
 				}
 				else {
 					if (seqMatrixShift) {
 						seqMatrixShift = false;
 						forceUpdate = true;
-						updatePage(currentPage);
+						updatePage(selectedTrack);
 					}
 				}
 					
