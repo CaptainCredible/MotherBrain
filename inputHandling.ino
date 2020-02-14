@@ -201,39 +201,39 @@ void handleLPCC(byte channel, byte CC, byte val) {
 			switch (buttWasPressed)
 			{
 			case 1:
-					if (selectedTrack != 0 && globalPolyRhythmEnable && polyRhythm[selectedTrack]) {
-						desiredPolyEndStep[selectedTrack] = 8;
-					}
-					else {
-						desiredEndStep = 8;
-					}
-					
+				if (selectedTrack != 0 && globalPolyRhythmEnable && polyRhythm[selectedTrack]) {
+					desiredPolyStartStep[selectedTrack] = 0;
+				}
+				else {
+					desiredStartStep = 0;
+				}
+
 				break;
 
 			case 2:
 				if (selectedTrack != 0 && globalPolyRhythmEnable && polyRhythm[selectedTrack]) {
-					desiredPolyEndStep[selectedTrack] = 16;
+					desiredPolyStartStep[selectedTrack] = 8;
 				}
 				else {
-					desiredEndStep = 16;
+					desiredStartStep = 8;
 				}
 				break;
 
 			case 3:
 				if (selectedTrack != 0 && globalPolyRhythmEnable && polyRhythm[selectedTrack]) {
-					desiredPolyEndStep[selectedTrack] = 24;
+					desiredPolyStartStep[selectedTrack] = 16;
 				}
 				else {
-					desiredEndStep = 24;
+					desiredStartStep = 16;
 				}
 				break;
 
 			case 4:
 				if (selectedTrack != 0 && globalPolyRhythmEnable && polyRhythm[selectedTrack]) {
-					desiredPolyEndStep[selectedTrack] = 32;
+					desiredPolyStartStep[selectedTrack] = 24;
 				}
 				else {
-					desiredEndStep = 32;
+					desiredStartStep = 24;
 				}
 				break;
 
@@ -327,38 +327,38 @@ void handleLPCC(byte channel, byte CC, byte val) {
 			{
 			case 1:
 				if (selectedTrack != 0 && globalPolyRhythmEnable && polyRhythm[selectedTrack]) {
-					desiredPolyStartStep[selectedTrack] = 0;
+					desiredPolyEndStep[selectedTrack] = 8;
 				}
 				else {
-					desiredStartStep = 0;
+					desiredEndStep = 8;
 				}
-					
+
 				break;
 
 			case 2:
 				if (selectedTrack != 0 && globalPolyRhythmEnable && polyRhythm[selectedTrack]) {
-					desiredPolyStartStep[selectedTrack] = 8;
+					desiredPolyEndStep[selectedTrack] = 16;
 				}
 				else {
-					desiredStartStep = 8;
+					desiredEndStep = 16;
 				}
 				break;
 
 			case 3:
 				if (selectedTrack != 0 && globalPolyRhythmEnable && polyRhythm[selectedTrack]) {
-					desiredPolyStartStep[selectedTrack] = 16;
+					desiredPolyEndStep[selectedTrack] = 24;
 				}
 				else {
-					desiredStartStep = 16;
+					desiredEndStep = 24;
 				}
 				break;
 
 			case 4:
 				if (selectedTrack != 0 && globalPolyRhythmEnable && polyRhythm[selectedTrack]) {
-					desiredPolyStartStep[selectedTrack] = 24;
+					desiredPolyEndStep[selectedTrack] = 32;
 				}
 				else {
-					desiredStartStep = 24;
+					desiredEndStep = 32;
 				}
 				break;
 
