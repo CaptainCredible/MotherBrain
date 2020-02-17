@@ -50,9 +50,6 @@ void displayPageNumber() {
 }
 
 void updatePage(byte mode) { // forceUpdate is a boolean to force a page update even if its not a page flip
-
-
-
 	if (follow) {
 		int tempStep = currentStep;
 		if (globalPolyRhythmEnable && polyRhythm[selectedTrack]) {
@@ -97,6 +94,7 @@ void updatePage(byte mode) { // forceUpdate is a boolean to force a page update 
 
 			firstStepOfPage = currentPage * 8;
 			updateVertButts();
+
 			if (selectedTrack == 0) {
 				handleOverviewPage();
 			}
@@ -126,6 +124,10 @@ void updatePage(byte mode) { // forceUpdate is a boolean to force a page update 
 		}
 	}
 	handleTopLeds();
+	if (musMutesPage) {
+		Serial.println("1");
+		handleMusMutesPage();
+	}
 }
 
 void handleTrackPage(byte trackPageToHandle) {
@@ -383,3 +385,7 @@ void updateVertButts() {
 	}
 }
 
+
+void handleMusMutesPage() {
+	Serial.println("poop");
+}

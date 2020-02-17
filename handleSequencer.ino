@@ -279,3 +279,15 @@ void recallSeq() {
 
 }
 
+void clearSeqPage() {
+	int startPoint = currentPage * 8;
+	for (int trackz = 0; trackz < 9; trackz++) {
+		for (int stepz = 0; stepz < 8; stepz++) {
+			seqMatrix[stepz + startPoint + (trackz * 32)] = 0;
+		}
+	}
+	//Serial.print("cleared");
+	//Serial.println(startPoint);
+	forceUpdate = true;
+	updatePage(selectedTrack);
+}

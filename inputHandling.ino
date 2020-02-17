@@ -1,6 +1,8 @@
 byte oldScrollOffset = 0;
 byte trackScrollOffsets[11] = { 8,8,8,8,8,8,8,8,64,64,0 };
 
+bool musMutesPage = false;
+
 void handleFollowIndicator() {
 	for (byte i = 0; i < 8; i++) {
 
@@ -93,13 +95,39 @@ void handleLPNoteOn(byte channel, byte pitch, byte velocity) {
 		handlePageButtons(pitch);
 		break;
 
+	case 116: //musicianmutes
+		if (SHIFT) {
+			//musMutesPage = !musMutesPage;
+			//Serial.println(musMutesPage);
+			//updatePage(selectedTrack);
+			break;
+		}
+	case 112: //musicianmutes
+		if (SHIFT) {
+			storeSeq();
+			break;
+		}
 
+	case 114: //storeseq
+		if (SHIFT) {
+			clearSeqPage();
+			break;
+		}
+
+	case 113: // loadseq
+		if (SHIFT) {
+			recallSeq();
+			forceUpdate = true;
+			updatePage(selectedTrack);
+			break;
+		}
+
+		
 	default:
+		//Serial.println(pitch);
 		byte rowPressed = (pitch >> 4) + scrollOffset;
 		byte colPressed = pitch % 8;
 		////////////////////////////////////////////////////////////////
-
-
 		if (selectedTrack == 0) { //IF WE ARE IN OVERVIEW MODE
 			int matrixCursor = LPtoMatrix[pitch] + (currentPage * 8);
 			
@@ -477,7 +505,7 @@ void handleKnobsAndButtons() {
 
 	if (buttB) {
 		if (SHIFT) {
-			storeSeq();
+			//storeSeq();
 			//storeSeqAlt();
 			//EEPROMTest();
 		}
