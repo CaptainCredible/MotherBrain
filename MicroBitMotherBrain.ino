@@ -1,3 +1,7 @@
+//requires nick gammons i2c anything and the board Arcore "Arduino Leonardo (MIDI)"
+// REQUIRES VERSION 4.3.1 of Forty Seven Effects MIDI library.
+
+
 //#define DEBUG
 #define OLDSCHOOLUSB
 
@@ -8,13 +12,14 @@
 #include <I2C_Anything.h>
 
 #ifdef OLDSCHOOLUSB
+//#include <MIDIUSB_Defs.h>
 //#include <MIDIUSB.h>
+//MIDIUSB IS BUILT IN TO ARCORE Arduino Leonardo (MIDI) board
 #else 
 #include <midi_UsbTransport.h>
 static const unsigned sUsbTransportBufferSize = 16;
 typedef midi::UsbTransport<sUsbTransportBufferSize> UsbTransport;
 UsbTransport sUsbTransport;
-
 #endif
 
 
@@ -438,6 +443,3 @@ void handlePageNumDisplayTimeouts() {
 		}
 	}
 }
-
-
-

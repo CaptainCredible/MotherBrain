@@ -95,20 +95,20 @@ void handleLPNoteOn(byte channel, byte pitch, byte velocity) {
 		handlePageButtons(pitch);
 		break;
 
-	case 116: //musicianmutes
+	case 116: //musicianmutes work in progress
 		if (SHIFT) {
 			//musMutesPage = !musMutesPage;
 			//Serial.println(musMutesPage);
 			//updatePage(selectedTrack);
 			break;
 		}
-	case 112: //musicianmutes
+	case 112: // Save / storeseq
 		if (SHIFT) {
 			storeSeq();
 			break;
 		}
 
-	case 114: //storeseq
+	case 114: //nuke / clearseqpage
 		if (SHIFT) {
 			clearSeqPage();
 			break;
