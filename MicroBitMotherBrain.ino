@@ -1,9 +1,21 @@
 //requires nick gammons i2c anything and the board Arcore "Arduino Leonardo (MIDI)"
 // REQUIRES VERSION 4.3.1 of Forty Seven Effects MIDI library.
 
+//TODO:
+// Make new method for sending tracks to microbit:
+// Track number, data, data, data, data where each "data" is a note
+// Track number has highest bit set, so  subtract 32768 to get actual number 
+// e.g. 0b1000000000000010 is instrument 2
+// how to eeprom storage ?? 
+// 8 instruments * 32 steps * 2 sets = 512 individual steps, with a note cap of 6 per step thats 3072 bytes 
+// atmega32u4 has 1024 bytes... that would allow us 2 notes per track. :(
+
+
 
 //#define DEBUG
 #define OLDSCHOOLUSB
+
+
 
 
 #include <EEPROM.h>

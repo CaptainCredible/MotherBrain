@@ -450,6 +450,9 @@ void limitScrollOffset() {
 
 #define minStepDuration 33
 
+unsigned int debounceTimer = 0;
+int debounceThresh = 30;
+
 void handleKnobsAndButtons() {
 	int oldKnobA = knobA;
 	knobA = analogRead(A1);
@@ -467,17 +470,43 @@ void handleKnobsAndButtons() {
 	}
 
 	bool oldButtA = buttA;
-	buttA = !digitalRead(buttApin);
+	
+	if (!digitalRead(buttApin) != oldButtA) {
+		if (millis() - debounceTimer > debounceThresh) {
+			buttA = !digitalRead(buttApin);
+			debounceTimer = millis();
+		}
+		
+	}
+
 
 	bool oldButtB = buttB;
-	buttB = !digitalRead(buttBpin);
+	if (!digitalRead(buttBpin) != oldButtB) {
+		if (millis() - debounceTimer > debounceThresh) {
+			buttB = !digitalRead(buttBpin);
+			debounceTimer = millis();
+		}
+	}
+
 
 	bool oldButtC = buttC;
-	buttC = !digitalRead(buttCpin);
+	if (!digitalRead(buttCpin) != oldButtC) {
+		if (millis() - debounceTimer > debounceThresh) {
+			buttC = !digitalRead(buttCpin);
+			debounceTimer = millis();
+		}
+	}
+
 
 	bool oldButtX = buttX;
-	buttX = !digitalRead(buttXpin);
-	SHIFT = buttX;
+	if (!digitalRead(buttXpin) != oldButtX) {
+		if (millis() - debounceTimer > debounceThresh) {
+			buttX = !digitalRead(buttXpin);
+			debounceTimer = millis();
+			SHIFT = buttX;
+		}
+	}
+	
 	digitalWrite(polyRhythmLed, polyRhythm[selectedTrack] && globalPolyRhythmEnable);
 	//stepDuration = ((2048+minStepDuration) - (knobA << 1));
 
